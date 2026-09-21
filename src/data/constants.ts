@@ -1,9 +1,16 @@
 import type { BlockInfo, Discipline } from '../types'
+import type { Lang } from '../i18n/LanguageContext'
 
 // Không gắn tên dự án/chủ đầu tư/nhà thầu/địa danh cụ thể nào - đây là công trình minh hoạ
 // dùng để trình diễn năng lực BIM của ISCM-UEH, không phải hồ sơ của một dự án thật.
-export const PROJECT_NAME = 'Nhà xưởng công nghiệp cho thuê'
-export const PLATFORM_TITLE = 'CÔNG TRÌNH MINH HOẠ — Nhà xưởng công nghiệp cho thuê'
+export const PROJECT_NAME: Record<Lang, string> = {
+  vi: 'Nhà xưởng công nghiệp cho thuê',
+  en: 'Industrial warehouse for lease',
+}
+export const PLATFORM_TITLE: Record<Lang, string> = {
+  vi: 'CÔNG TRÌNH MINH HOẠ — Nhà xưởng công nghiệp cho thuê',
+  en: 'ILLUSTRATIVE PROJECT — Industrial Warehouse for Lease',
+}
 export const PROJECT_VALUE = 312_000_000_000
 export const TOTAL_AREA_M2 = 39_000
 

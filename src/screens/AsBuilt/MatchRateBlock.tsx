@@ -1,12 +1,18 @@
 import { BLOCKS } from '../../data/constants'
 import { MODEL_MATCH_RATE, MODEL_MATCH_RATE_AVG } from '../../data/modelVersions'
+import { useLang } from '../../i18n/LanguageContext'
 
 export function MatchRateBlock() {
+  const { lang } = useLang()
   return (
     <div className="rounded-xl glass p-4">
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-sm font-semibold text-white/90">Mức độ trùng khớp mô hình với hiện trạng</p>
-        <span className="text-xs text-white/45">Trung bình {MODEL_MATCH_RATE_AVG}%</span>
+        <p className="text-sm font-semibold text-white/90">
+          {lang === 'vi' ? 'Mức độ trùng khớp mô hình với hiện trạng' : 'Model-to-site match rate'}
+        </p>
+        <span className="text-xs text-white/45">
+          {lang === 'vi' ? 'Trung bình' : 'Average'} {MODEL_MATCH_RATE_AVG}%
+        </span>
       </div>
       <div className="space-y-3">
         {BLOCKS.map((b) => {

@@ -1,6 +1,7 @@
 import { ArrowRight } from 'lucide-react'
 import { WireframeBackground } from './WireframeBackground'
 import { useInView } from '../../hooks/useInView'
+import { useLang } from '../../i18n/LanguageContext'
 import ctdLogo from '../../assets/logos/ctdlogo_white.png'
 import iscmLogo from '../../assets/logos/iscm_white_text_v1.png'
 
@@ -10,6 +11,7 @@ interface IntroHeroProps {
 
 export function IntroHero({ onEnter }: IntroHeroProps) {
   const { ref, inView } = useInView<HTMLElement>()
+  const { lang } = useLang()
 
   return (
     <section
@@ -30,10 +32,14 @@ export function IntroHero({ onEnter }: IntroHeroProps) {
           BIM-based Construction Monitoring Platform
         </h1>
         <p className="mt-4 max-w-xl text-base text-white/60">
-          Viện Đô thị Thông minh và Quản lý — Đại học Kinh tế TP.HCM
+          {lang === 'vi'
+            ? 'Viện Đô thị Thông minh và Quản lý — Đại học Kinh tế TP.HCM'
+            : 'Institute of Smart City and Management — University of Economics Ho Chi Minh City'}
         </p>
         <p className="mt-6 max-w-lg font-heading text-lg text-brand">
-          Từ mô hình thông tin công trình đến bản sao số đô thị
+          {lang === 'vi'
+            ? 'Từ mô hình thông tin công trình đến bản sao số đô thị'
+            : 'From building information model to urban digital twin'}
         </p>
 
         <button
@@ -41,7 +47,7 @@ export function IntroHero({ onEnter }: IntroHeroProps) {
           onClick={onEnter}
           className="glow-brand mt-10 flex items-center gap-2 rounded-full bg-brand px-7 py-3.5 text-sm font-semibold text-white transition-transform duration-200 hover:scale-105"
         >
-          Khám phá nền tảng
+          {lang === 'vi' ? 'Khám phá nền tảng' : 'Explore the platform'}
           <ArrowRight size={16} />
         </button>
       </div>

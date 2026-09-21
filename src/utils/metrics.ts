@@ -74,15 +74,25 @@ export interface NamedValue {
   value: number
 }
 
-export function getClashByDisciplinePair(): NamedValue[] {
-  const map = new Map<string, number>()
+export interface DisciplinePairValue {
+  /** Vietnamese-joined pair — canonical key, used for stable color assignment only. */
+  name: string
+  a: Discipline
+  b: Discipline
+  value: number
+}
+
+export function getClashByDisciplinePair(): DisciplinePairValue[] {
+  const map = new Map<string, { a: Discipline; b: Discipline; value: number }>()
   clashes.forEach((c) => {
-    const pair = [c.disciplineA, c.disciplineB].sort().join(' – ')
-    map.set(pair, (map.get(pair) ?? 0) + 1)
+    const [a, b] = [c.disciplineA, c.disciplineB].sort() as [Discipline, Discipline]
+    const pair = `${a} – ${b}`
+    const existing = map.get(pair)
+    map.set(pair, { a, b, value: (existing?.value ?? 0) + 1 })
   })
   return Array.from(map.entries())
-    .map(([name, value]) => ({ name, value }))
-    .sort((a, b) => b.value - a.value)
+    .map(([name, v]) => ({ name, ...v }))
+    .sort((x, y) => y.value - x.value)
 }
 
 export function getClashByDiscipline(): Record<Discipline, number> {

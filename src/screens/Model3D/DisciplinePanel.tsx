@@ -1,6 +1,8 @@
 import { Layers, ScissorsLineDashed, Check } from 'lucide-react'
 import type { BlockId, Discipline } from '../../types'
 import { BLOCKS, DISCIPLINE_COLORS, DISCIPLINES } from '../../data/constants'
+import { useLang } from '../../i18n/LanguageContext'
+import { disciplineLabel } from '../../i18n/labels'
 
 interface DisciplinePanelProps {
   visible: Record<Discipline, boolean>
@@ -23,11 +25,12 @@ export function DisciplinePanel({
   cutPosition,
   onCutPositionChange,
 }: DisciplinePanelProps) {
+  const { lang } = useLang()
   return (
     <aside className="glass flex w-64 shrink-0 flex-col gap-5 overflow-y-auto rounded-2xl p-4">
       <div>
         <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-white/45">
-          <Layers size={13} /> Chọn block
+          <Layers size={13} /> {lang === 'vi' ? 'Chọn block' : 'Select block'}
         </p>
         <div className="grid grid-cols-3 gap-1.5">
           <button
@@ -39,7 +42,7 @@ export function DisciplinePanel({
                 : 'bg-navy-800 text-white/60 hover:text-white/90'
             }`}
           >
-            Tất cả
+            {lang === 'vi' ? 'Tất cả' : 'All'}
           </button>
           {BLOCKS.map((b) => (
             <button
@@ -59,7 +62,9 @@ export function DisciplinePanel({
       </div>
 
       <div>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-white/45">Bộ môn hiển thị</p>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-white/45">
+          {lang === 'vi' ? 'Bộ môn hiển thị' : 'Visible disciplines'}
+        </p>
         <div className="space-y-1.5">
           {DISCIPLINES.map((d) => (
             <label
@@ -81,7 +86,7 @@ export function DisciplinePanel({
               >
                 {visible[d] && <Check size={11} strokeWidth={3} className="text-navy-950" />}
               </span>
-              {d}
+              {disciplineLabel(d, lang)}
             </label>
           ))}
         </div>
@@ -90,7 +95,7 @@ export function DisciplinePanel({
       <div>
         <label className="mb-2 flex cursor-pointer items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-white/45">
           <input type="checkbox" checked={cutEnabled} onChange={onToggleCut} className="accent-brand" />
-          <ScissorsLineDashed size={13} /> Chế độ cắt mặt cắt
+          <ScissorsLineDashed size={13} /> {lang === 'vi' ? 'Chế độ cắt mặt cắt' : 'Section-cut mode'}
         </label>
         {cutEnabled && (
           <input
@@ -106,9 +111,19 @@ export function DisciplinePanel({
       </div>
 
       <div className="mt-auto space-y-1.5 border-t border-navy-700 pt-3 text-[11px] leading-relaxed text-white/45">
-        <p>Chuột trái: xoay · Cuộn: phóng to/thu nhỏ</p>
-        <p>Chuột phải kéo: di chuyển góc nhìn</p>
-        <p>Bấm marker đỏ để xem chi tiết xung đột</p>
+        {lang === 'vi' ? (
+          <>
+            <p>Chuột trái: xoay · Cuộn: phóng to/thu nhỏ</p>
+            <p>Chuột phải kéo: di chuyển góc nhìn</p>
+            <p>Bấm marker đỏ để xem chi tiết xung đột</p>
+          </>
+        ) : (
+          <>
+            <p>Left click: rotate · Scroll: zoom in/out</p>
+            <p>Right-click drag: pan the view</p>
+            <p>Click a red marker to see clash details</p>
+          </>
+        )}
       </div>
     </aside>
   )

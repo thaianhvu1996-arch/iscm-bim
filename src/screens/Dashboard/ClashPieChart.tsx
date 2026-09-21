@@ -1,9 +1,15 @@
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts'
 import { getClashByDisciplinePair, disciplinePairColor } from '../../utils/metrics'
 import { ChartTooltip } from '../../components/common/ChartTooltip'
+import { useLang } from '../../i18n/LanguageContext'
+import { disciplineLabel } from '../../i18n/labels'
 
 export function ClashPieChart() {
-  const data = getClashByDisciplinePair()
+  const { lang } = useLang()
+  const data = getClashByDisciplinePair().map((d) => ({
+    ...d,
+    displayName: `${disciplineLabel(d.a, lang)} – ${disciplineLabel(d.b, lang)}`,
+  }))
 
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -11,7 +17,7 @@ export function ClashPieChart() {
         <Pie
           data={data}
           dataKey="value"
-          nameKey="name"
+          nameKey="displayName"
           cx="38%"
           cy="50%"
           innerRadius="52%"
@@ -23,7 +29,9 @@ export function ClashPieChart() {
             <Cell key={entry.name} fill={disciplinePairColor(entry.name)} stroke="#0d1526" strokeWidth={2} />
           ))}
         </Pie>
-        <Tooltip content={<ChartTooltip formatter={(item) => `${item.value} xung đột`} />} />
+        <Tooltip
+          content={<ChartTooltip formatter={(item) => `${item.value} ${lang === 'vi' ? 'xung đột' : 'clashes'}`} />}
+        />
         <Legend
           layout="vertical"
           verticalAlign="middle"

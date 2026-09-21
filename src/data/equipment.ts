@@ -1,4 +1,5 @@
 import type { BlockId, Equipment, EquipmentSystem, MaintenanceTask } from '../types'
+import type { Lang } from '../i18n/LanguageContext'
 import { BLOCK_IDS, PROJECT_START, CURRENT_DATE } from './constants'
 import { createRng, pick, randInt, addMonths, daysBetween, shuffle, type Rng } from '../utils/random'
 
@@ -12,290 +13,300 @@ function monthDate(monthIndex: number, day: number): Date {
   return d
 }
 
+const same = (s: string): Record<Lang, string> => ({ vi: s, en: s })
+
 interface TypeDef {
-  name: string
+  name: Record<Lang, string>
   system: EquipmentSystem
   manufacturers: string[]
   modelPrefix: string
-  capacity: (r: Rng) => string
+  capacity: (r: Rng) => Record<Lang, string>
   scope: 'perBlock' | 'project' | 'spread'
   count?: number
-  location: (block: BlockId | 'Toàn dự án') => string
+  location: (block: BlockId | 'Toàn dự án') => Record<Lang, string>
   maintenanceCycleMonths: number
   warrantyMonths: number
   installMonthRange: [number, number]
 }
 
-const flow = (min: number, max: number) => (r: Rng) => `${randInt(r, min, max)} m³/h`
-const power = (min: number, max: number) => (r: Rng) => `${randInt(r, min, max)} kW`
-const kva = (min: number, max: number) => (r: Rng) => `${randInt(r, min, max)} kVA`
-const airflow = (min: number, max: number) => (r: Rng) => `${randInt(r, min, max)} m³/h`
-const cool = (min: number, max: number) => (r: Rng) => `${randInt(r, min, max)} kBTU/h`
-const litres = (min: number, max: number) => (r: Rng) => `${randInt(r, min, max)} lít`
+const flow = (min: number, max: number) => (r: Rng) => same(`${randInt(r, min, max)} m³/h`)
+const power = (min: number, max: number) => (r: Rng) => same(`${randInt(r, min, max)} kW`)
+const kva = (min: number, max: number) => (r: Rng) => same(`${randInt(r, min, max)} kVA`)
+const airflow = (min: number, max: number) => (r: Rng) => same(`${randInt(r, min, max)} m³/h`)
+const cool = (min: number, max: number) => (r: Rng) => same(`${randInt(r, min, max)} kBTU/h`)
+const litres = (min: number, max: number) => (r: Rng) => {
+  const n = randInt(r, min, max)
+  return { vi: `${n} lít`, en: `${n} L` }
+}
+
+const centralFirePumpStationEn = { vi: 'Trạm bơm PCCC trung tâm', en: 'Central fire pump station' }
+const securityGate = { vi: 'Cổng bảo vệ', en: 'Security gate' }
 
 const TYPES: TypeDef[] = [
   // ----- PCCC -----
   {
-    name: 'Máy bơm chữa cháy điện', system: 'PCCC',
+    name: { vi: 'Máy bơm chữa cháy điện', en: 'Electric fire pump' }, system: 'PCCC',
     manufacturers: ['Pentax', 'Ebara', 'Tyco'], modelPrefix: 'PFE',
     capacity: flow(120, 360), scope: 'project', count: 1,
-    location: () => 'Trạm bơm PCCC trung tâm', maintenanceCycleMonths: 3, warrantyMonths: 24,
+    location: () => centralFirePumpStationEn, maintenanceCycleMonths: 3, warrantyMonths: 24,
     installMonthRange: [2, 3],
   },
   {
-    name: 'Máy bơm chữa cháy diesel dự phòng', system: 'PCCC',
+    name: { vi: 'Máy bơm chữa cháy diesel dự phòng', en: 'Standby diesel fire pump' }, system: 'PCCC',
     manufacturers: ['Pentax', 'Ebara'], modelPrefix: 'PFD',
     capacity: flow(120, 360), scope: 'project', count: 1,
-    location: () => 'Trạm bơm PCCC trung tâm', maintenanceCycleMonths: 1, warrantyMonths: 24,
+    location: () => centralFirePumpStationEn, maintenanceCycleMonths: 1, warrantyMonths: 24,
     installMonthRange: [2, 3],
   },
   {
-    name: 'Máy bơm bù áp (Jockey pump)', system: 'PCCC',
+    name: { vi: 'Máy bơm bù áp (Jockey pump)', en: 'Jockey pump' }, system: 'PCCC',
     manufacturers: ['Pentax', 'Ebara'], modelPrefix: 'PJP',
     capacity: flow(5, 15), scope: 'project', count: 1,
-    location: () => 'Trạm bơm PCCC trung tâm', maintenanceCycleMonths: 3, warrantyMonths: 24,
+    location: () => centralFirePumpStationEn, maintenanceCycleMonths: 3, warrantyMonths: 24,
     installMonthRange: [2, 3],
   },
   {
-    name: 'Bể nước dự trữ chữa cháy', system: 'PCCC',
+    name: { vi: 'Bể nước dự trữ chữa cháy', en: 'Fire-reserve water tank' }, system: 'PCCC',
     manufacturers: ['Sơn Hà', 'Tân Á Đại Thành'], modelPrefix: 'BNC',
     capacity: litres(200_000, 450_000), scope: 'project', count: 1,
-    location: () => 'Trạm bơm PCCC trung tâm', maintenanceCycleMonths: 12, warrantyMonths: 60,
+    location: () => centralFirePumpStationEn, maintenanceCycleMonths: 12, warrantyMonths: 60,
     installMonthRange: [1, 2],
   },
   {
-    name: 'Tủ điều khiển bơm chữa cháy', system: 'PCCC',
+    name: { vi: 'Tủ điều khiển bơm chữa cháy', en: 'Fire pump control panel' }, system: 'PCCC',
     manufacturers: ['Tyco', 'Horing'], modelPrefix: 'FCP',
-    capacity: () => '380V/3P/50Hz', scope: 'project', count: 1,
-    location: () => 'Trạm bơm PCCC trung tâm', maintenanceCycleMonths: 6, warrantyMonths: 24,
+    capacity: () => same('380V/3P/50Hz'), scope: 'project', count: 1,
+    location: () => centralFirePumpStationEn, maintenanceCycleMonths: 6, warrantyMonths: 24,
     installMonthRange: [2, 3],
   },
   {
-    name: 'Tủ báo cháy trung tâm (FACP)', system: 'PCCC',
+    name: { vi: 'Tủ báo cháy trung tâm (FACP)', en: 'Fire alarm control panel (FACP)' }, system: 'PCCC',
     manufacturers: ['Hochiki', 'Nohmi Bosai', 'Horing'], modelPrefix: 'FACP',
-    capacity: () => '2 loop / 254 địa chỉ', scope: 'perBlock',
-    location: (b) => `Phòng kỹ thuật ${b}`, maintenanceCycleMonths: 6, warrantyMonths: 24,
+    capacity: () => ({ vi: '2 loop / 254 địa chỉ', en: '2 loops / 254 addresses' }), scope: 'perBlock',
+    location: (b) => ({ vi: `Phòng kỹ thuật ${b}`, en: `Technical room ${b}` }), maintenanceCycleMonths: 6, warrantyMonths: 24,
     installMonthRange: [4, 6],
   },
   {
-    name: 'Hộp chữa cháy vách tường (cụm khu vực)', system: 'PCCC',
+    name: { vi: 'Hộp chữa cháy vách tường (cụm khu vực)', en: 'Wall fire hose cabinet (area cluster)' }, system: 'PCCC',
     manufacturers: ['Horing', 'Alpha'], modelPrefix: 'HCC',
-    capacity: () => 'DN65, cuộn vòi 30m', scope: 'perBlock',
-    location: (b) => `Nhà xưởng ${b}`, maintenanceCycleMonths: 6, warrantyMonths: 24,
+    capacity: () => ({ vi: 'DN65, cuộn vòi 30m', en: 'DN65, 30m hose reel' }), scope: 'perBlock',
+    location: (b) => ({ vi: `Nhà xưởng ${b}`, en: `Warehouse ${b}` }), maintenanceCycleMonths: 6, warrantyMonths: 24,
     installMonthRange: [4, 7],
   },
   {
-    name: 'Đầu báo khói địa chỉ (cụm khu vực)', system: 'PCCC',
+    name: { vi: 'Đầu báo khói địa chỉ (cụm khu vực)', en: 'Addressable smoke detector (area cluster)' }, system: 'PCCC',
     manufacturers: ['Hochiki', 'Nohmi Bosai'], modelPrefix: 'SD',
-    capacity: () => 'Cảm biến quang điện', scope: 'perBlock',
-    location: (b) => `Nhà xưởng ${b}`, maintenanceCycleMonths: 12, warrantyMonths: 24,
+    capacity: () => ({ vi: 'Cảm biến quang điện', en: 'Photoelectric sensor' }), scope: 'perBlock',
+    location: (b) => ({ vi: `Nhà xưởng ${b}`, en: `Warehouse ${b}` }), maintenanceCycleMonths: 12, warrantyMonths: 24,
     installMonthRange: [4, 7],
   },
   {
-    name: 'Trụ chữa cháy ngoài nhà', system: 'PCCC',
+    name: { vi: 'Trụ chữa cháy ngoài nhà', en: 'Outdoor fire hydrant' }, system: 'PCCC',
     manufacturers: ['Horing', 'Alpha'], modelPrefix: 'FH',
-    capacity: () => 'DN100, 2 họng', scope: 'spread', count: 8,
-    location: (b) => `Sân bãi ngoài nhà ${b}`, maintenanceCycleMonths: 12, warrantyMonths: 24,
+    capacity: () => ({ vi: 'DN100, 2 họng', en: 'DN100, 2 outlets' }), scope: 'spread', count: 8,
+    location: (b) => ({ vi: `Sân bãi ngoài nhà ${b}`, en: `Outdoor yard ${b}` }), maintenanceCycleMonths: 12, warrantyMonths: 24,
     installMonthRange: [2, 4],
   },
   {
-    name: 'Bình chữa cháy xe đẩy (khu kỹ thuật)', system: 'PCCC',
+    name: { vi: 'Bình chữa cháy xe đẩy (khu kỹ thuật)', en: 'Wheeled fire extinguisher (technical area)' }, system: 'PCCC',
     manufacturers: ['Alpha'], modelPrefix: 'MFZ',
-    capacity: () => 'Bột ABC 35kg', scope: 'perBlock',
-    location: (b) => `Khu kỹ thuật ${b}`, maintenanceCycleMonths: 6, warrantyMonths: 12,
+    capacity: () => ({ vi: 'Bột ABC 35kg', en: '35kg ABC powder' }), scope: 'perBlock',
+    location: (b) => ({ vi: `Khu kỹ thuật ${b}`, en: `Technical area ${b}` }), maintenanceCycleMonths: 6, warrantyMonths: 12,
     installMonthRange: [4, 7],
   },
 
   // ----- Điện -----
   {
-    name: 'Trạm biến áp', system: 'Điện',
+    name: { vi: 'Trạm biến áp', en: 'Transformer station' }, system: 'Điện',
     manufacturers: ['Thibidi', 'ABB'], modelPrefix: 'TBA',
     capacity: kva(1000, 1600), scope: 'perBlock',
-    location: (b) => `Trạm điện ${b}`, maintenanceCycleMonths: 12, warrantyMonths: 36,
+    location: (b) => ({ vi: `Trạm điện ${b}`, en: `Electrical station ${b}` }), maintenanceCycleMonths: 12, warrantyMonths: 36,
     installMonthRange: [2, 3],
   },
   {
-    name: 'Tủ điện tổng MSB', system: 'Điện',
+    name: { vi: 'Tủ điện tổng MSB', en: 'Main switchboard (MSB)' }, system: 'Điện',
     manufacturers: ['Schneider Electric', 'ABB', 'LS'], modelPrefix: 'MSB',
-    capacity: () => '1600A, 3P+N', scope: 'perBlock',
-    location: (b) => `Phòng điện ${b}`, maintenanceCycleMonths: 6, warrantyMonths: 24,
+    capacity: () => same('1600A, 3P+N'), scope: 'perBlock',
+    location: (b) => ({ vi: `Phòng điện ${b}`, en: `Electrical room ${b}` }), maintenanceCycleMonths: 6, warrantyMonths: 24,
     installMonthRange: [3, 4],
   },
   {
-    name: 'Tủ điện phân phối DB', system: 'Điện',
+    name: { vi: 'Tủ điện phân phối DB', en: 'Distribution panel (DB)' }, system: 'Điện',
     manufacturers: ['Schneider Electric', 'LS'], modelPrefix: 'DB',
-    capacity: () => '250A, 3P+N', scope: 'spread', count: 8,
-    location: (b) => `Hành lang kỹ thuật ${b}`, maintenanceCycleMonths: 6, warrantyMonths: 24,
+    capacity: () => same('250A, 3P+N'), scope: 'spread', count: 8,
+    location: (b) => ({ vi: `Hành lang kỹ thuật ${b}`, en: `Technical corridor ${b}` }), maintenanceCycleMonths: 6, warrantyMonths: 24,
     installMonthRange: [4, 6],
   },
   {
-    name: 'Máy phát điện dự phòng', system: 'Điện',
+    name: { vi: 'Máy phát điện dự phòng', en: 'Standby generator' }, system: 'Điện',
     manufacturers: ['Cummins', 'Mitsubishi Electric'], modelPrefix: 'GEN',
     capacity: kva(500, 800), scope: 'spread', count: 2,
-    location: (b) => `Trạm điện ${b}`, maintenanceCycleMonths: 3, warrantyMonths: 24,
+    location: (b) => ({ vi: `Trạm điện ${b}`, en: `Electrical station ${b}` }), maintenanceCycleMonths: 3, warrantyMonths: 24,
     installMonthRange: [3, 4],
   },
   {
-    name: 'Tủ chuyển nguồn tự động (ATS)', system: 'Điện',
+    name: { vi: 'Tủ chuyển nguồn tự động (ATS)', en: 'Automatic transfer switch (ATS)' }, system: 'Điện',
     manufacturers: ['Comap', 'Schneider Electric'], modelPrefix: 'ATS',
-    capacity: () => '800A', scope: 'spread', count: 2,
-    location: (b) => `Trạm điện ${b}`, maintenanceCycleMonths: 6, warrantyMonths: 24,
+    capacity: () => same('800A'), scope: 'spread', count: 2,
+    location: (b) => ({ vi: `Trạm điện ${b}`, en: `Electrical station ${b}` }), maintenanceCycleMonths: 6, warrantyMonths: 24,
     installMonthRange: [3, 4],
   },
   {
-    name: 'Tủ tụ bù', system: 'Điện',
+    name: { vi: 'Tủ tụ bù', en: 'Capacitor bank panel' }, system: 'Điện',
     manufacturers: ['Schneider Electric', 'LS'], modelPrefix: 'CAP',
     capacity: kva(150, 400), scope: 'perBlock',
-    location: (b) => `Phòng điện ${b}`, maintenanceCycleMonths: 6, warrantyMonths: 24,
+    location: (b) => ({ vi: `Phòng điện ${b}`, en: `Electrical room ${b}` }), maintenanceCycleMonths: 6, warrantyMonths: 24,
     installMonthRange: [3, 5],
   },
   {
-    name: 'Hệ thống chiếu sáng nhà xưởng & sự cố', system: 'Điện',
+    name: { vi: 'Hệ thống chiếu sáng nhà xưởng & sự cố', en: 'Warehouse & emergency lighting system' }, system: 'Điện',
     manufacturers: ['Paragon', 'Điện Quang', 'Philips'], modelPrefix: 'LED',
     capacity: power(150, 250), scope: 'perBlock',
-    location: (b) => `Nhà xưởng ${b}`, maintenanceCycleMonths: 12, warrantyMonths: 36,
+    location: (b) => ({ vi: `Nhà xưởng ${b}`, en: `Warehouse ${b}` }), maintenanceCycleMonths: 12, warrantyMonths: 36,
     installMonthRange: [5, 8],
   },
 
   // ----- Cấp thoát nước -----
   {
-    name: 'Bơm nước sinh hoạt', system: 'Cấp thoát nước',
+    name: { vi: 'Bơm nước sinh hoạt', en: 'Domestic water pump' }, system: 'Cấp thoát nước',
     manufacturers: ['Ebara', 'Pentax'], modelPrefix: 'PDW',
     capacity: flow(15, 40), scope: 'perBlock',
-    location: (b) => `Phòng bơm nước ${b}`, maintenanceCycleMonths: 6, warrantyMonths: 24,
+    location: (b) => ({ vi: `Phòng bơm nước ${b}`, en: `Water pump room ${b}` }), maintenanceCycleMonths: 6, warrantyMonths: 24,
     installMonthRange: [4, 6],
   },
   {
-    name: 'Bơm tăng áp', system: 'Cấp thoát nước',
+    name: { vi: 'Bơm tăng áp', en: 'Booster pump' }, system: 'Cấp thoát nước',
     manufacturers: ['Grundfos', 'Ebara'], modelPrefix: 'PBA',
     capacity: flow(10, 25), scope: 'spread', count: 2,
-    location: (b) => `Phòng bơm nước ${b}`, maintenanceCycleMonths: 6, warrantyMonths: 24,
+    location: (b) => ({ vi: `Phòng bơm nước ${b}`, en: `Water pump room ${b}` }), maintenanceCycleMonths: 6, warrantyMonths: 24,
     installMonthRange: [4, 6],
   },
   {
-    name: 'Bơm nước thải (submersible)', system: 'Cấp thoát nước',
+    name: { vi: 'Bơm nước thải (submersible)', en: 'Wastewater pump (submersible)' }, system: 'Cấp thoát nước',
     manufacturers: ['Tsurumi', 'Ebara'], modelPrefix: 'PWW',
     capacity: flow(8, 30), scope: 'spread', count: 8,
-    location: (b) => `Trạm bơm nước thải ${b}`, maintenanceCycleMonths: 3, warrantyMonths: 24,
+    location: (b) => ({ vi: `Trạm bơm nước thải ${b}`, en: `Wastewater pump station ${b}` }), maintenanceCycleMonths: 3, warrantyMonths: 24,
     installMonthRange: [4, 7],
   },
   {
-    name: 'Bể tự hoại', system: 'Cấp thoát nước',
+    name: { vi: 'Bể tự hoại', en: 'Septic tank' }, system: 'Cấp thoát nước',
     manufacturers: ['Sơn Hà'], modelPrefix: 'BTH',
     capacity: litres(15_000, 30_000), scope: 'perBlock',
-    location: (b) => `Khu xử lý nước thải ${b}`, maintenanceCycleMonths: 12, warrantyMonths: 60,
+    location: (b) => ({ vi: `Khu xử lý nước thải ${b}`, en: `Wastewater treatment area ${b}` }), maintenanceCycleMonths: 12, warrantyMonths: 60,
     installMonthRange: [2, 3],
   },
   {
-    name: 'Bể tách dầu mỡ', system: 'Cấp thoát nước',
+    name: { vi: 'Bể tách dầu mỡ', en: 'Grease trap' }, system: 'Cấp thoát nước',
     manufacturers: ['Sơn Hà'], modelPrefix: 'BTM',
     capacity: litres(2_000, 5_000), scope: 'spread', count: 2,
-    location: (b) => `Khu xử lý nước thải ${b}`, maintenanceCycleMonths: 6, warrantyMonths: 36,
+    location: (b) => ({ vi: `Khu xử lý nước thải ${b}`, en: `Wastewater treatment area ${b}` }), maintenanceCycleMonths: 6, warrantyMonths: 36,
     installMonthRange: [3, 4],
   },
 
   // ----- HVAC -----
   {
-    name: 'Hệ thống điều hòa VRV khu văn phòng', system: 'HVAC',
+    name: { vi: 'Hệ thống điều hòa VRV khu văn phòng', en: 'VRV air-conditioning system, office area' }, system: 'HVAC',
     manufacturers: ['Daikin', 'Mitsubishi Electric', 'Panasonic'], modelPrefix: 'VRV',
     capacity: cool(96, 180), scope: 'perBlock',
-    location: (b) => `Khu văn phòng ${b}`, maintenanceCycleMonths: 3, warrantyMonths: 24,
+    location: (b) => ({ vi: `Khu văn phòng ${b}`, en: `Office area ${b}` }), maintenanceCycleMonths: 3, warrantyMonths: 24,
     installMonthRange: [6, 8],
   },
   {
-    name: 'Quạt hút công nghiệp mái nhà xưởng', system: 'HVAC',
+    name: { vi: 'Quạt hút công nghiệp mái nhà xưởng', en: 'Warehouse roof industrial exhaust fan' }, system: 'HVAC',
     manufacturers: ['Fantech', 'Deton'], modelPrefix: 'FAN',
     capacity: airflow(8000, 25000), scope: 'spread', count: 14,
-    location: (b) => `Mái nhà xưởng ${b}`, maintenanceCycleMonths: 6, warrantyMonths: 12,
+    location: (b) => ({ vi: `Mái nhà xưởng ${b}`, en: `Warehouse roof ${b}` }), maintenanceCycleMonths: 6, warrantyMonths: 12,
     installMonthRange: [5, 7],
   },
   {
-    name: 'Quạt cấp gió tươi', system: 'HVAC',
+    name: { vi: 'Quạt cấp gió tươi', en: 'Fresh-air supply fan' }, system: 'HVAC',
     manufacturers: ['Fantech', 'Deton'], modelPrefix: 'FAV',
     capacity: airflow(5000, 15000), scope: 'perBlock',
-    location: (b) => `Nhà xưởng ${b}`, maintenanceCycleMonths: 6, warrantyMonths: 12,
+    location: (b) => ({ vi: `Nhà xưởng ${b}`, en: `Warehouse ${b}` }), maintenanceCycleMonths: 6, warrantyMonths: 12,
     installMonthRange: [5, 7],
   },
   {
-    name: 'Chiller giải nhiệt gió', system: 'HVAC',
+    name: { vi: 'Chiller giải nhiệt gió', en: 'Air-cooled chiller' }, system: 'HVAC',
     manufacturers: ['Daikin', 'Trane', 'York'], modelPrefix: 'CHL',
     capacity: cool(50, 120), scope: 'spread', count: 2,
-    location: (b) => `Sân kỹ thuật ${b}`, maintenanceCycleMonths: 3, warrantyMonths: 24,
+    location: (b) => ({ vi: `Sân kỹ thuật ${b}`, en: `Technical yard ${b}` }), maintenanceCycleMonths: 3, warrantyMonths: 24,
     installMonthRange: [6, 8],
   },
 
   // ----- Hạ tầng -----
   {
-    name: 'Trạm bơm thoát nước mưa', system: 'Hạ tầng',
+    name: { vi: 'Trạm bơm thoát nước mưa', en: 'Stormwater pump station' }, system: 'Hạ tầng',
     manufacturers: ['Tsurumi', 'Ebara'], modelPrefix: 'PSR',
     capacity: flow(80, 200), scope: 'spread', count: 2,
-    location: (b) => `Hồ điều hòa ${b}`, maintenanceCycleMonths: 6, warrantyMonths: 24,
+    location: (b) => ({ vi: `Hồ điều hòa ${b}`, en: `Regulating pond ${b}` }), maintenanceCycleMonths: 6, warrantyMonths: 24,
     installMonthRange: [2, 3],
   },
   {
-    name: 'Hệ thống xử lý nước mưa đợt đầu', system: 'Hạ tầng',
+    name: { vi: 'Hệ thống xử lý nước mưa đợt đầu', en: 'First-flush rainwater treatment system' }, system: 'Hạ tầng',
     manufacturers: ['Sơn Hà'], modelPrefix: 'FFR',
     capacity: flow(50, 100), scope: 'project', count: 1,
-    location: () => 'Khu xử lý nước mưa tập trung', maintenanceCycleMonths: 6, warrantyMonths: 36,
+    location: () => ({ vi: 'Khu xử lý nước mưa tập trung', en: 'Central rainwater treatment area' }), maintenanceCycleMonths: 6, warrantyMonths: 36,
     installMonthRange: [2, 3],
   },
   {
-    name: 'Cổng barrier tự động', system: 'Hạ tầng',
+    name: { vi: 'Cổng barrier tự động', en: 'Automatic barrier gate' }, system: 'Hạ tầng',
     manufacturers: ['FAAC', 'BFT'], modelPrefix: 'BAR',
-    capacity: () => 'Cần chắn 4m', scope: 'spread', count: 2,
-    location: () => 'Cổng bảo vệ', maintenanceCycleMonths: 6, warrantyMonths: 12,
+    capacity: () => ({ vi: 'Cần chắn 4m', en: '4m boom barrier' }), scope: 'spread', count: 2,
+    location: () => securityGate, maintenanceCycleMonths: 6, warrantyMonths: 12,
     installMonthRange: [7, 8],
   },
   {
-    name: 'Trạm cân xe tải', system: 'Hạ tầng',
+    name: { vi: 'Trạm cân xe tải', en: 'Truck weighbridge' }, system: 'Hạ tầng',
     manufacturers: ['Sartorius', 'Mettler Toledo'], modelPrefix: 'WBR',
-    capacity: () => 'Tải trọng 60 tấn', scope: 'project', count: 1,
-    location: () => 'Cổng bảo vệ', maintenanceCycleMonths: 12, warrantyMonths: 24,
+    capacity: () => ({ vi: 'Tải trọng 60 tấn', en: '60-ton capacity' }), scope: 'project', count: 1,
+    location: () => securityGate, maintenanceCycleMonths: 12, warrantyMonths: 24,
     installMonthRange: [7, 8],
   },
   {
-    name: 'Hệ thống camera an ninh', system: 'Hạ tầng',
+    name: { vi: 'Hệ thống camera an ninh', en: 'Security camera system' }, system: 'Hạ tầng',
     manufacturers: ['Hikvision', 'Dahua'], modelPrefix: 'CAM',
-    capacity: () => '32 kênh, độ phân giải 4MP', scope: 'perBlock',
-    location: (b) => `Khu vực ${b}`, maintenanceCycleMonths: 12, warrantyMonths: 24,
+    capacity: () => ({ vi: '32 kênh, độ phân giải 4MP', en: '32 channels, 4MP resolution' }), scope: 'perBlock',
+    location: (b) => ({ vi: `Khu vực ${b}`, en: `Area ${b}` }), maintenanceCycleMonths: 12, warrantyMonths: 24,
     installMonthRange: [7, 9],
   },
   {
-    name: 'Đèn chiếu sáng sân bãi', system: 'Hạ tầng',
+    name: { vi: 'Đèn chiếu sáng sân bãi', en: 'Yard lighting' }, system: 'Hạ tầng',
     manufacturers: ['Philips', 'Rạng Đông'], modelPrefix: 'PLE',
     capacity: power(150, 250), scope: 'perBlock',
-    location: (b) => `Sân bãi ${b}`, maintenanceCycleMonths: 12, warrantyMonths: 36,
+    location: (b) => ({ vi: `Sân bãi ${b}`, en: `Yard ${b}` }), maintenanceCycleMonths: 12, warrantyMonths: 36,
     installMonthRange: [6, 8],
   },
   {
-    name: 'Hệ thống chống sét & tiếp địa', system: 'Hạ tầng',
+    name: { vi: 'Hệ thống chống sét & tiếp địa', en: 'Lightning protection & grounding system' }, system: 'Hạ tầng',
     manufacturers: ['ERICO', 'Nemtek'], modelPrefix: 'LPS',
-    capacity: () => 'Kim thu sét tia tiên đạo, bán kính 60m', scope: 'perBlock',
-    location: (b) => `Mái nhà xưởng ${b}`, maintenanceCycleMonths: 12, warrantyMonths: 36,
+    capacity: () => ({ vi: 'Kim thu sét tia tiên đạo, bán kính 60m', en: 'Early streamer emission air terminal, 60m radius' }), scope: 'perBlock',
+    location: (b) => ({ vi: `Mái nhà xưởng ${b}`, en: `Warehouse roof ${b}` }), maintenanceCycleMonths: 12, warrantyMonths: 36,
     installMonthRange: [5, 7],
   },
   {
-    name: 'Máy nén khí trung tâm', system: 'Hạ tầng',
+    name: { vi: 'Máy nén khí trung tâm', en: 'Central air compressor' }, system: 'Hạ tầng',
     manufacturers: ['Hitachi', 'Fusheng', 'Puma'], modelPrefix: 'ACP',
     capacity: power(15, 37), scope: 'spread', count: 2,
-    location: (b) => `Khu kỹ thuật ${b}`, maintenanceCycleMonths: 3, warrantyMonths: 24,
+    location: (b) => ({ vi: `Khu kỹ thuật ${b}`, en: `Technical area ${b}` }), maintenanceCycleMonths: 3, warrantyMonths: 24,
     installMonthRange: [6, 8],
   },
 ]
 
-const DOC_KINDS = [
-  'Catalogue kỹ thuật',
-  'Biên bản nghiệm thu',
-  'Hướng dẫn vận hành & bảo trì',
-  'Chứng chỉ CO/CQ',
-  'Bản vẽ hoàn công',
+const DOC_KINDS: Array<Record<Lang, string>> = [
+  { vi: 'Catalogue kỹ thuật', en: 'Technical catalogue' },
+  { vi: 'Biên bản nghiệm thu', en: 'Acceptance record' },
+  { vi: 'Hướng dẫn vận hành & bảo trì', en: 'Operation & maintenance manual' },
+  { vi: 'Chứng chỉ CO/CQ', en: 'CO/CQ certificate' },
+  { vi: 'Bản vẽ hoàn công', en: 'As-built drawing' },
 ]
 
-function makeDocs(prefix: string, id: string): string[] {
+function makeDocs(prefix: string, id: string): Record<Lang, string[]> {
   const n = randInt(rng, 2, 4)
-  return shuffle(rng, DOC_KINDS)
-    .slice(0, n)
-    .map((k) => `${k} - ${prefix} (${id}).pdf`)
+  const kinds = shuffle(rng, DOC_KINDS).slice(0, n)
+  return {
+    vi: kinds.map((k) => `${k.vi} - ${prefix} (${id}).pdf`),
+    en: kinds.map((k) => `${k.en} - ${prefix} (${id}).pdf`),
+  }
 }
 
 function buildMaintenanceSchedule(cycleMonths: number, installDate: Date): MaintenanceTask[] {
@@ -305,7 +316,7 @@ function buildMaintenanceSchedule(cycleMonths: number, installDate: Date): Maint
     cursor = addMonths(cursor, cycleMonths)
   }
   while (daysBetween(CURRENT_DATE, cursor) <= 365 && tasks.length < 6) {
-    tasks.push({ date: cursor, task: 'Bảo trì định kỳ' })
+    tasks.push({ date: cursor, task: { vi: 'Bảo trì định kỳ', en: 'Periodic maintenance' } })
     cursor = addMonths(cursor, cycleMonths)
   }
   return tasks
@@ -336,11 +347,16 @@ function generateEquipment(): Equipment[] {
 
       const cluster = Math.floor(idx / BLOCK_IDS.length) + 1
       const blockSuffix = block !== 'Toàn dự án' ? ` - Block ${block}` : ''
-      const clusterSuffix = totalClusters > 1 && t.scope === 'spread' ? ` (cụm ${cluster})` : ''
+      const showCluster = totalClusters > 1 && t.scope === 'spread'
+      const clusterSuffixVi = showCluster ? ` (cụm ${cluster})` : ''
+      const clusterSuffixEn = showCluster ? ` (cluster ${cluster})` : ''
 
       list.push({
         id,
-        name: `${t.name}${blockSuffix}${clusterSuffix}`,
+        name: {
+          vi: `${t.name.vi}${blockSuffix}${clusterSuffixVi}`,
+          en: `${t.name.en}${blockSuffix}${clusterSuffixEn}`,
+        },
         system: t.system,
         block,
         location: t.location(block),

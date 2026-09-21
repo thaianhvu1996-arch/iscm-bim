@@ -13,8 +13,10 @@ import {
 import { getSCurveWeeklyData } from '../../utils/metrics'
 import { STATUS_COLORS } from '../../data/constants'
 import { ChartTooltip } from '../../components/common/ChartTooltip'
+import { useLang } from '../../i18n/LanguageContext'
 
 export function SCurveChart() {
+  const { lang } = useLang()
   const raw = getSCurveWeeklyData()
   const data = raw.map((p) => ({
     ...p,
@@ -51,7 +53,12 @@ export function SCurveChart() {
             x={lastActual.label}
             stroke="#64748b"
             strokeDasharray="2 2"
-            label={{ value: 'Hôm nay', position: 'insideTopRight', fill: '#64748b', fontSize: 11 }}
+            label={{
+              value: lang === 'vi' ? 'Hôm nay' : 'Today',
+              position: 'insideTopRight',
+              fill: '#64748b',
+              fontSize: 11,
+            }}
           />
         )}
         <Area
@@ -75,7 +82,7 @@ export function SCurveChart() {
         />
         <Line
           dataKey="ke_hoach"
-          name="Kế hoạch"
+          name={lang === 'vi' ? 'Kế hoạch' : 'Planned'}
           stroke={STATUS_COLORS.neutral}
           strokeWidth={2}
           strokeDasharray="5 4"
@@ -84,7 +91,7 @@ export function SCurveChart() {
         />
         <Line
           dataKey="thuc_te"
-          name="Thực tế"
+          name={lang === 'vi' ? 'Thực tế' : 'Actual'}
           stroke={STATUS_COLORS.info}
           strokeWidth={2.5}
           dot={false}

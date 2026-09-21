@@ -1,3 +1,5 @@
+import type { Lang } from '../i18n/LanguageContext'
+
 export type BlockId = 'A' | 'B' | 'C' | 'D'
 
 export type Discipline = 'Kiến trúc' | 'Kết cấu' | 'MEP' | 'Hạ tầng'
@@ -31,7 +33,7 @@ export type ScheduleStatus =
 
 export interface ScheduleItem {
   id: string
-  name: string
+  name: Record<Lang, string>
   discipline: Discipline
   block: BlockId | 'Toàn dự án'
   unit: string
@@ -44,7 +46,7 @@ export interface ScheduleItem {
   percentComplete: number
   status: ScheduleStatus
   delayDays: number
-  note: string
+  note: Record<Lang, string>
   isCriticalPath: boolean
 }
 
@@ -57,12 +59,12 @@ export type ClashStatus = 'Mới' | 'Đang xử lý' | 'Đã xử lý' | 'Bỏ q
 export interface ClashComment {
   author: string
   date: Date
-  message: string
+  message: Record<Lang, string>
 }
 
 export interface Clash {
   id: string
-  description: string
+  description: Record<Lang, string>
   disciplineA: Discipline
   disciplineB: Discipline
   block: BlockId
@@ -84,22 +86,22 @@ export type EquipmentSystem = 'PCCC' | 'Điện' | 'Cấp thoát nước' | 'HVA
 
 export interface MaintenanceTask {
   date: Date
-  task: string
+  task: Record<Lang, string>
 }
 
 export interface Equipment {
   id: string
-  name: string
+  name: Record<Lang, string>
   system: EquipmentSystem
   block: BlockId | 'Toàn dự án'
-  location: string
+  location: Record<Lang, string>
   manufacturer: string
   model: string
-  capacity: string
+  capacity: Record<Lang, string>
   installDate: Date
   warrantyUntil: Date
   maintenanceCycleMonths: number
-  documents: string[]
+  documents: Record<Lang, string[]>
   upcomingMaintenance: MaintenanceTask[]
 }
 
@@ -112,11 +114,11 @@ export interface FieldChange {
   date: Date
   block: BlockId
   discipline: Discipline
-  description: string
-  reason: string
+  description: Record<Lang, string>
+  reason: Record<Lang, string>
   reporter: string
   modelStatus: FieldChangeStatus
-  quantityImpact: string
+  quantityImpact: Record<Lang, string>
 }
 
 export interface ModelVersion {
@@ -124,7 +126,7 @@ export interface ModelVersion {
   date: Date
   changesIntegrated: number
   author: string
-  note: string
+  note: Record<Lang, string>
 }
 
 // ----- Cảnh báo (Dashboard) -----
@@ -134,7 +136,7 @@ export type AlertLevel = 'Nghiêm trọng' | 'Cảnh báo' | 'Thông tin'
 export interface AlertItem {
   id: string
   level: AlertLevel
-  title: string
+  title: Record<Lang, string>
   time: Date
   assignee: string
 }
@@ -150,5 +152,5 @@ export interface TenantInfo {
   powerUsedKVA: number
   containerDoors: number
   status: 'Còn trống' | 'Đã thuê'
-  tenantName?: string
+  tenantName?: Record<Lang, string>
 }

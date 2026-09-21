@@ -8,6 +8,8 @@ import { formatVNDShort } from '../../utils/format'
 import { ClashCharts } from './ClashCharts'
 import { ClashTable, type SortState } from './ClashTable'
 import { ClashDetailPanel } from './ClashDetailPanel'
+import { useLang } from '../../i18n/LanguageContext'
+import { clashStatusLabel } from '../../i18n/labels'
 
 type BlockFilter = 'all' | BlockId
 type SeverityFilter = 'all' | ClashSeverity
@@ -17,6 +19,7 @@ const SEVERITIES: ClashSeverity[] = ['A', 'B', 'C']
 const STATUSES: ClashStatus[] = ['Mới', 'Đang xử lý', 'Đã xử lý', 'Bỏ qua']
 
 export function Clash() {
+  const { lang } = useLang()
   const [search, setSearch] = useState('')
   const [blockFilter, setBlockFilter] = useState<BlockFilter>('all')
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>('all')
@@ -36,7 +39,7 @@ export function Clash() {
       if (blockFilter !== 'all' && c.block !== blockFilter) return false
       if (severityFilter !== 'all' && c.severity !== severityFilter) return false
       if (statusFilter !== 'all' && c.status !== statusFilter) return false
-      if (q && !c.description.toLowerCase().includes(q) && !c.id.toLowerCase().includes(q)) return false
+      if (q && !c.description[lang].toLowerCase().includes(q) && !c.id.toLowerCase().includes(q)) return false
       return true
     })
     const dir = sort.direction === 'asc' ? 1 : -1
@@ -58,7 +61,7 @@ export function Clash() {
           return 0
       }
     })
-  }, [displayClashes, search, blockFilter, severityFilter, statusFilter, sort])
+  }, [displayClashes, search, blockFilter, severityFilter, statusFilter, sort, lang])
 
   const selected = displayClashes.find((c) => c.id === selectedId) ?? null
   const preventedCost = getPreventedCost()
@@ -71,11 +74,15 @@ export function Clash() {
             <ShieldCheck size={22} />
           </div>
           <div>
-            <p className="text-xs font-medium text-white/60">Tổng chi phí rủi ro đã ngăn ngừa</p>
-            <p className="text-3xl font-bold text-status-success">{formatVNDShort(preventedCost)}</p>
+            <p className="text-xs font-medium text-white/60">
+              {lang === 'vi' ? 'Tổng chi phí rủi ro đã ngăn ngừa' : 'Total risk cost prevented'}
+            </p>
+            <p className="text-3xl font-bold text-status-success">{formatVNDShort(preventedCost, lang)}</p>
           </div>
           <p className="ml-auto max-w-xs text-xs leading-relaxed text-white/60">
-            Tổng chi phí ước tính của các xung đột nhóm A, B đã được phát hiện và xử lý qua mô hình BIM trước khi thi công.
+            {lang === 'vi'
+              ? 'Tổng chi phí ước tính của các xung đột nhóm A, B đã được phát hiện và xử lý qua mô hình BIM trước khi thi công.'
+              : 'Total estimated cost of Group A/B clashes detected and resolved on the BIM model before construction.'}
           </p>
         </div>
 
@@ -87,13 +94,13 @@ export function Clash() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Tìm theo mã hoặc mô tả..."
+              placeholder={lang === 'vi' ? 'Tìm theo mã hoặc mô tả...' : 'Search by code or description...'}
               className="w-48 bg-transparent text-xs text-white/90 placeholder:text-white/35 focus:outline-none"
             />
           </div>
           <FilterGroup label="Block">
             <FilterChip active={blockFilter === 'all'} onClick={() => setBlockFilter('all')}>
-              Tất cả
+              {lang === 'vi' ? 'Tất cả' : 'All'}
             </FilterChip>
             {BLOCKS.map((b) => (
               <FilterChip key={b.id} active={blockFilter === b.id} onClick={() => setBlockFilter(b.id)}>
@@ -101,9 +108,9 @@ export function Clash() {
               </FilterChip>
             ))}
           </FilterGroup>
-          <FilterGroup label="Mức độ">
+          <FilterGroup label={lang === 'vi' ? 'Mức độ' : 'Severity'}>
             <FilterChip active={severityFilter === 'all'} onClick={() => setSeverityFilter('all')}>
-              Tất cả
+              {lang === 'vi' ? 'Tất cả' : 'All'}
             </FilterChip>
             {SEVERITIES.map((s) => (
               <FilterChip key={s} active={severityFilter === s} onClick={() => setSeverityFilter(s)}>
@@ -111,17 +118,19 @@ export function Clash() {
               </FilterChip>
             ))}
           </FilterGroup>
-          <FilterGroup label="Trạng thái">
+          <FilterGroup label={lang === 'vi' ? 'Trạng thái' : 'Status'}>
             <FilterChip active={statusFilter === 'all'} onClick={() => setStatusFilter('all')}>
-              Tất cả
+              {lang === 'vi' ? 'Tất cả' : 'All'}
             </FilterChip>
             {STATUSES.map((s) => (
               <FilterChip key={s} active={statusFilter === s} onClick={() => setStatusFilter(s)}>
-                {s}
+                {clashStatusLabel(s, lang)}
               </FilterChip>
             ))}
           </FilterGroup>
-          <span className="ml-auto text-xs text-white/45">{filtered.length} / {clashes.length} xung đột</span>
+          <span className="ml-auto text-xs text-white/45">
+            {filtered.length} / {clashes.length} {lang === 'vi' ? 'xung đột' : 'clashes'}
+          </span>
         </div>
 
         <ClashTable items={filtered} selectedId={selectedId} onSelect={(c) => setSelectedId(c.id)} sort={sort} onSortChange={setSort} />

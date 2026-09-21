@@ -9,6 +9,8 @@ import { DisciplinePanel } from './DisciplinePanel'
 import { MonthSlider } from './MonthSlider'
 import { ClashInfoPanel } from './ClashInfoPanel'
 import { stageMonth } from './constructionStages'
+import { useLang } from '../../i18n/LanguageContext'
+import { disciplineLabel, blockLabel } from '../../i18n/labels'
 
 const ALL_VISIBLE: Record<Discipline, boolean> = DISCIPLINES.reduce(
   (acc, d) => ({ ...acc, [d]: true }),
@@ -28,6 +30,7 @@ interface Model3DProps {
 
 export function Model3D({ focus }: Model3DProps) {
   const { permissions } = useRole()
+  const { lang } = useLang()
   const [month, setMonth] = useState(4)
   const [visible, setVisible] = useState<Record<Discipline, boolean>>(ALL_VISIBLE)
   const [selectedBlock, setSelectedBlock] = useState<BlockId | 'all'>('all')
@@ -96,7 +99,8 @@ export function Model3D({ focus }: Model3DProps) {
           {showFocusBanner && focus && (
             <div className="glow-brand absolute left-4 top-4 flex items-center gap-2.5 rounded-lg border border-brand/40 bg-brand/15 px-3 py-1.5 text-xs text-white backdrop-blur">
               <Sparkles size={13} className="text-brand" />
-              Đang làm nổi bật: {focus.discipline} · {focus.block === 'all' ? 'Toàn dự án' : `Block ${focus.block}`}
+              {lang === 'vi' ? 'Đang làm nổi bật' : 'Highlighting'}: {disciplineLabel(focus.discipline, lang)} ·{' '}
+              {focus.block === 'all' ? blockLabel('Toàn dự án', lang) : `Block ${focus.block}`}
               <button type="button" onClick={clearFocus} className="text-white/60 hover:text-white">
                 <X size={13} />
               </button>
@@ -104,7 +108,9 @@ export function Model3D({ focus }: Model3DProps) {
           )}
           {!showFocusBanner && permissions.canSeeClashDetail && (
             <div className="glass pointer-events-none absolute left-4 top-4 rounded-lg px-3 py-1.5 text-xs text-white/60">
-              {visibleMarkers.length} xung đột chưa xử lý đang hiển thị
+              {lang === 'vi'
+                ? `${visibleMarkers.length} xung đột chưa xử lý đang hiển thị`
+                : `${visibleMarkers.length} open clashes shown`}
             </div>
           )}
         </div>

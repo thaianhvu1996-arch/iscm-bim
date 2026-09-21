@@ -6,6 +6,8 @@ import { EquipmentTable } from './EquipmentTable'
 import { EquipmentDetailPanel } from './EquipmentDetailPanel'
 import { TenantInfoPanel } from './TenantInfoPanel'
 import { MaintenanceCalendar } from './MaintenanceCalendar'
+import { useLang } from '../../i18n/LanguageContext'
+import { equipmentSystemLabel } from '../../i18n/labels'
 
 type BlockFilter = 'all' | BlockId
 type SystemFilter = 'all' | EquipmentSystem
@@ -13,6 +15,7 @@ type SystemFilter = 'all' | EquipmentSystem
 const SYSTEMS: EquipmentSystem[] = ['PCCC', 'Điện', 'Cấp thoát nước', 'HVAC', 'Hạ tầng']
 
 export function Assets() {
+  const { lang } = useLang()
   const [systemFilter, setSystemFilter] = useState<SystemFilter>('all')
   const [blockFilter, setBlockFilter] = useState<BlockFilter>('all')
   const [selected, setSelected] = useState<Equipment | null>(null)
@@ -33,19 +36,19 @@ export function Assets() {
         <TenantInfoPanel />
 
         <div className="flex flex-wrap items-center gap-3 rounded-xl glass p-3">
-          <FilterGroup label="Hệ thống">
+          <FilterGroup label={lang === 'vi' ? 'Hệ thống' : 'System'}>
             <FilterChip active={systemFilter === 'all'} onClick={() => setSystemFilter('all')}>
-              Tất cả
+              {lang === 'vi' ? 'Tất cả' : 'All'}
             </FilterChip>
             {SYSTEMS.map((s) => (
               <FilterChip key={s} active={systemFilter === s} onClick={() => setSystemFilter(s)}>
-                {s}
+                {equipmentSystemLabel(s, lang)}
               </FilterChip>
             ))}
           </FilterGroup>
           <FilterGroup label="Block">
             <FilterChip active={blockFilter === 'all'} onClick={() => setBlockFilter('all')}>
-              Tất cả
+              {lang === 'vi' ? 'Tất cả' : 'All'}
             </FilterChip>
             {BLOCKS.map((b) => (
               <FilterChip key={b.id} active={blockFilter === b.id} onClick={() => setBlockFilter(b.id)}>
@@ -54,7 +57,7 @@ export function Assets() {
             ))}
           </FilterGroup>
           <span className="ml-auto text-xs text-white/45">
-            {filtered.length} / {equipment.length} thiết bị
+            {filtered.length} / {equipment.length} {lang === 'vi' ? 'thiết bị' : 'equipment'}
           </span>
         </div>
 

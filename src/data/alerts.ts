@@ -21,7 +21,10 @@ function buildAlerts(): AlertItem[] {
     alerts.push({
       id: `CB-${c.id}`,
       level: 'Nghiêm trọng',
-      title: `Xung đột nhóm A quá hạn xử lý (Block ${c.block}): ${c.description}`,
+      title: {
+        vi: `Xung đột nhóm A quá hạn xử lý (Block ${c.block}): ${c.description.vi}`,
+        en: `Group A clash overdue (Block ${c.block}): ${c.description.en}`,
+      },
       time: c.dueDate,
       assignee: c.assignee,
     })
@@ -35,7 +38,10 @@ function buildAlerts(): AlertItem[] {
     alerts.push({
       id: `CB-${s.id}`,
       level: 'Cảnh báo',
-      title: `Hạng mục đường găng chậm tiến độ ${s.delayDays} ngày: ${s.name}`,
+      title: {
+        vi: `Hạng mục đường găng chậm tiến độ ${s.delayDays} ngày: ${s.name.vi}`,
+        en: `Critical-path item delayed ${s.delayDays} days: ${s.name.en}`,
+      },
       time: s.plannedEnd,
       assignee: SITE_TEAM[0].name,
     })
@@ -46,7 +52,10 @@ function buildAlerts(): AlertItem[] {
     alerts.push({
       id: 'CB-TD',
       level: 'Thông tin',
-      title: `${pendingUpdates.length} thay đổi hiện trường đang chờ cập nhật vào mô hình`,
+      title: {
+        vi: `${pendingUpdates.length} thay đổi hiện trường đang chờ cập nhật vào mô hình`,
+        en: `${pendingUpdates.length} field changes pending model update`,
+      },
       time: CURRENT_DATE,
       assignee: BIM_TEAM[1].name,
     })
@@ -56,7 +65,10 @@ function buildAlerts(): AlertItem[] {
   alerts.push({
     id: 'CB-XD-MOI',
     level: 'Thông tin',
-    title: `${newClashesCount} xung đột mới phát hiện trong tuần cần phân công xử lý`,
+    title: {
+      vi: `${newClashesCount} xung đột mới phát hiện trong tuần cần phân công xử lý`,
+      en: `${newClashesCount} new clashes detected this week need assignment`,
+    },
     time: CURRENT_DATE,
     assignee: BIM_TEAM[0].name,
   })

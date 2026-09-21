@@ -10,7 +10,7 @@ export const tenantInfo: TenantInfo[] = [
     powerUsedKVA: 850,
     containerDoors: 10,
     status: 'Đã thuê',
-    tenantName: 'Công ty TNHH Logistics Phương Nam',
+    tenantName: { vi: 'Công ty TNHH Logistics Phương Nam', en: 'Phuong Nam Logistics Co., Ltd.' },
   },
   {
     block: 'B',
@@ -21,7 +21,7 @@ export const tenantInfo: TenantInfo[] = [
     powerUsedKVA: 620,
     containerDoors: 10,
     status: 'Đã thuê',
-    tenantName: 'Công ty CP Sản xuất Điện tử Việt Thành',
+    tenantName: { vi: 'Công ty CP Sản xuất Điện tử Việt Thành', en: 'Viet Thanh Electronics JSC' },
   },
   {
     block: 'C',

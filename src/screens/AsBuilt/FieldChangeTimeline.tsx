@@ -5,10 +5,13 @@ import { BLOCKS } from '../../data/constants'
 import { Badge } from '../../components/common/Badge'
 import { fieldChangeStatusTone } from '../../utils/tone'
 import { formatDate } from '../../utils/format'
+import { useLang } from '../../i18n/LanguageContext'
+import { disciplineLabel, fieldChangeStatusLabel } from '../../i18n/labels'
 
 type BlockFilter = 'all' | BlockId
 
 export function FieldChangeTimeline() {
+  const { lang } = useLang()
   const [blockFilter, setBlockFilter] = useState<BlockFilter>('all')
   const items = [...fieldChanges]
     .filter((c) => blockFilter === 'all' || c.block === blockFilter)
@@ -17,10 +20,12 @@ export function FieldChangeTimeline() {
   return (
     <div className="rounded-xl glass p-4">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-white/90">Dòng thời gian thay đổi hiện trường</p>
+        <p className="text-sm font-semibold text-white/90">
+          {lang === 'vi' ? 'Dòng thời gian thay đổi hiện trường' : 'Field change timeline'}
+        </p>
         <div className="flex gap-1.5">
           <FilterChip active={blockFilter === 'all'} onClick={() => setBlockFilter('all')}>
-            Tất cả
+            {lang === 'vi' ? 'Tất cả' : 'All'}
           </FilterChip>
           {BLOCKS.map((b) => (
             <FilterChip key={b.id} active={blockFilter === b.id} onClick={() => setBlockFilter(b.id)}>
@@ -43,16 +48,16 @@ export function FieldChangeTimeline() {
                 <span>·</span>
                 <span>Block {c.block}</span>
                 <span>·</span>
-                <span>{c.discipline}</span>
+                <span>{disciplineLabel(c.discipline, lang)}</span>
                 <Badge tone={fieldChangeStatusTone(c.modelStatus)} className="ml-auto">
-                  {c.modelStatus}
+                  {fieldChangeStatusLabel(c.modelStatus, lang)}
                 </Badge>
               </div>
-              <p className="text-sm text-white/90">{c.description}</p>
+              <p className="text-sm text-white/90">{c.description[lang]}</p>
               <div className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-white/45">
-                <span>Lý do: {c.reason}</span>
-                <span>Người báo: {c.reporter}</span>
-                <span>Ảnh hưởng KL: {c.quantityImpact}</span>
+                <span>{lang === 'vi' ? 'Lý do' : 'Reason'}: {c.reason[lang]}</span>
+                <span>{lang === 'vi' ? 'Người báo' : 'Reported by'}: {c.reporter}</span>
+                <span>{lang === 'vi' ? 'Ảnh hưởng KL' : 'Qty impact'}: {c.quantityImpact[lang]}</span>
               </div>
             </div>
           </div>

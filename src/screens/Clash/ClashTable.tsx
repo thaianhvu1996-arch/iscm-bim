@@ -3,6 +3,8 @@ import type { Clash } from '../../types'
 import { Badge } from '../../components/common/Badge'
 import { clashSeverityTone, clashStatusTone } from '../../utils/tone'
 import { formatDate, formatVNDShort } from '../../utils/format'
+import { useLang, type Lang } from '../../i18n/LanguageContext'
+import { blockLabel, clashStatusLabel } from '../../i18n/labels'
 
 export type SortKey = 'id' | 'severity' | 'block' | 'estimatedCost' | 'status' | 'dueDate'
 export interface SortState {
@@ -18,16 +20,20 @@ interface ClashTableProps {
   onSortChange: (sort: SortState) => void
 }
 
-const COLUMNS: Array<{ key: SortKey; label: string; align?: 'right' }> = [
-  { key: 'id', label: 'Mã' },
-  { key: 'severity', label: 'Mức độ' },
-  { key: 'block', label: 'Block' },
-  { key: 'estimatedCost', label: 'Chi phí ước tính', align: 'right' },
-  { key: 'status', label: 'Trạng thái' },
-  { key: 'dueDate', label: 'Hạn xử lý' },
-]
+function getColumns(lang: Lang): Array<{ key: SortKey; label: string; align?: 'right' }> {
+  return [
+    { key: 'id', label: lang === 'vi' ? 'Mã' : 'Code' },
+    { key: 'severity', label: lang === 'vi' ? 'Mức độ' : 'Severity' },
+    { key: 'block', label: 'Block' },
+    { key: 'estimatedCost', label: lang === 'vi' ? 'Chi phí ước tính' : 'Estimated cost', align: 'right' },
+    { key: 'status', label: lang === 'vi' ? 'Trạng thái' : 'Status' },
+    { key: 'dueDate', label: lang === 'vi' ? 'Hạn xử lý' : 'Due date' },
+  ]
+}
 
 export function ClashTable({ items, selectedId, onSelect, sort, onSortChange }: ClashTableProps) {
+  const { lang } = useLang()
+  const COLUMNS = getColumns(lang)
   const toggleSort = (key: SortKey) => {
     if (sort.key === key) {
       onSortChange({ key, direction: sort.direction === 'asc' ? 'desc' : 'asc' })
@@ -62,8 +68,8 @@ export function ClashTable({ items, selectedId, onSelect, sort, onSortChange }: 
                   </button>
                 </th>
               ))}
-              <th className="px-3 py-2.5 font-medium">Mô tả</th>
-              <th className="px-3 py-2.5 font-medium">Phụ trách</th>
+              <th className="px-3 py-2.5 font-medium">{lang === 'vi' ? 'Mô tả' : 'Description'}</th>
+              <th className="px-3 py-2.5 font-medium">{lang === 'vi' ? 'Phụ trách' : 'Assigned to'}</th>
             </tr>
           </thead>
           <tbody>
@@ -79,16 +85,16 @@ export function ClashTable({ items, selectedId, onSelect, sort, onSortChange }: 
                 <td className="px-3 py-2.5">
                   <Badge tone={clashSeverityTone(c.severity)}>{c.severity}</Badge>
                 </td>
-                <td className="px-3 py-2.5">{c.block}</td>
+                <td className="px-3 py-2.5">{blockLabel(c.block, lang)}</td>
                 <td className="px-3 py-2.5 text-right tabular-nums text-white/90">
-                  {formatVNDShort(c.estimatedCost)}
+                  {formatVNDShort(c.estimatedCost, lang)}
                 </td>
                 <td className="px-3 py-2.5">
-                  <Badge tone={clashStatusTone(c.status)}>{c.status}</Badge>
+                  <Badge tone={clashStatusTone(c.status)}>{clashStatusLabel(c.status, lang)}</Badge>
                 </td>
                 <td className="whitespace-nowrap px-3 py-2.5 text-white/60">{formatDate(c.dueDate)}</td>
-                <td className="max-w-xs truncate px-3 py-2.5 text-white/60" title={c.description}>
-                  {c.description}
+                <td className="max-w-xs truncate px-3 py-2.5 text-white/60" title={c.description[lang]}>
+                  {c.description[lang]}
                 </td>
                 <td className="whitespace-nowrap px-3 py-2.5 text-white/60">{c.assignee}</td>
               </tr>
@@ -96,7 +102,9 @@ export function ClashTable({ items, selectedId, onSelect, sort, onSortChange }: 
           </tbody>
         </table>
         {items.length === 0 && (
-          <p className="px-4 py-8 text-center text-sm text-white/45">Không có xung đột phù hợp bộ lọc.</p>
+          <p className="px-4 py-8 text-center text-sm text-white/45">
+            {lang === 'vi' ? 'Không có xung đột phù hợp bộ lọc.' : 'No clashes match the current filters.'}
+          </p>
         )}
       </div>
     </div>

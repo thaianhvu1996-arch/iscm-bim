@@ -1,4 +1,5 @@
 import type { BlockId, Clash, ClashComment, ClashStatus, ClashSeverity, Discipline } from '../types'
+import type { Lang } from '../i18n/LanguageContext'
 import { PROJECT_START, CURRENT_DATE } from './constants'
 import { BIM_TEAM, SITE_TEAM, namesOf } from './people'
 import {
@@ -33,7 +34,7 @@ const foundationCode = () => `M-${randInt(rng, 1, 60)}`
 const dbCode = (block: BlockId) => `DB-${block}${randInt(rng, 1, 12)}`
 
 interface TemplateResult {
-  text: string
+  text: Record<Lang, string>
   da: Discipline
   db: Discipline
   elevation: string
@@ -45,93 +46,140 @@ const TEMPLATES: Template[] = [
   (_block) => {
     const size = pick(rng, DUCT_SIZES)
     const beam = beamCode()
+    const ax = axis()
     const elev = pick(rng, ROOF_ELEVATIONS.concat(MID_ELEVATIONS))
     return {
-      text: `Ống gió ${size} xuyên qua dầm chính ${beam} trục ${axis()}, cao độ ${elev}`,
+      text: {
+        vi: `Ống gió ${size} xuyên qua dầm chính ${beam} trục ${ax}, cao độ ${elev}`,
+        en: `${size} duct penetrates main beam ${beam} at grid ${ax}, elevation ${elev}`,
+      },
       da: 'MEP', db: 'Kết cấu', elevation: elev,
     }
   },
   (_block) => {
     const size = pick(rng, PCCC_PIPE_SIZES)
-    const target = pick(rng, [`cột thép ${columnCode()}`, `dầm phụ ${beamCode()}`])
+    const useColumn = chance50()
+    const col = columnCode()
+    const beam = beamCode()
+    const ax = axis()
     const elev = pick(rng, MID_ELEVATIONS.concat(LOW_ELEVATIONS))
+    const targetVi = useColumn ? `cột thép ${col}` : `dầm phụ ${beam}`
+    const targetEn = useColumn ? `steel column ${col}` : `secondary beam ${beam}`
     return {
-      text: `Ống nước PCCC ${size} va chạm ${target} tại trục ${axis()}, cao độ ${elev}`,
+      text: {
+        vi: `Ống nước PCCC ${size} va chạm ${targetVi} tại trục ${ax}, cao độ ${elev}`,
+        en: `${size} fire-protection pipe clashes with ${targetEn} at grid ${ax}, elevation ${elev}`,
+      },
       da: 'MEP', db: 'Kết cấu', elevation: elev,
     }
   },
   (block) => {
     const elev = pick(rng, MID_ELEVATIONS)
     return {
-      text: `Máng cáp điện chạm hệ ống sprinkler tại hành lang kỹ thuật Block ${block}, cao độ ${elev}`,
+      text: {
+        vi: `Máng cáp điện chạm hệ ống sprinkler tại hành lang kỹ thuật Block ${block}, cao độ ${elev}`,
+        en: `Cable tray clashes with the sprinkler pipe system in the Block ${block} technical corridor, elevation ${elev}`,
+      },
       da: 'MEP', db: 'MEP', elevation: elev,
     }
   },
   (_block) => {
     const size = pick(rng, DUCT_SIZES)
     const tray = pick(rng, CABLE_TRAY_SIZES)
+    const ax = axis()
     const elev = pick(rng, MID_ELEVATIONS.concat(ROOF_ELEVATIONS))
     return {
-      text: `Ống gió ${size} chạm máng cáp điện ${tray} tại trục ${axis()}, cao độ ${elev}`,
+      text: {
+        vi: `Ống gió ${size} chạm máng cáp điện ${tray} tại trục ${ax}, cao độ ${elev}`,
+        en: `${size} duct clashes with ${tray} cable tray at grid ${ax}, elevation ${elev}`,
+      },
       da: 'MEP', db: 'MEP', elevation: elev,
     }
   },
   (_block) => {
     const size = pick(rng, DUCT_SIZES)
     const truss = trussCode()
+    const ax = axis()
     const elev = pick(rng, ROOF_ELEVATIONS)
     return {
-      text: `Miệng gió hồi ${size} va chạm vì kèo mái ${truss} tại trục ${axis()}, cao độ ${elev}`,
+      text: {
+        vi: `Miệng gió hồi ${size} va chạm vì kèo mái ${truss} tại trục ${ax}, cao độ ${elev}`,
+        en: `${size} return air grille clashes with roof truss ${truss} at grid ${ax}, elevation ${elev}`,
+      },
       da: 'MEP', db: 'Kết cấu', elevation: elev,
     }
   },
   (_block) => {
     const size = pick(rng, WATER_PIPE_SIZES)
     const fd = foundationCode()
+    const ax = axis()
     const elev = pick(rng, LOW_ELEVATIONS)
     return {
-      text: `Đường ống cấp thoát nước ${size} xuyên qua đài móng ${fd} tại trục ${axis()}`,
+      text: {
+        vi: `Đường ống cấp thoát nước ${size} xuyên qua đài móng ${fd} tại trục ${ax}`,
+        en: `${size} water supply/drainage pipe penetrates footing ${fd} at grid ${ax}`,
+      },
       da: 'MEP', db: 'Kết cấu', elevation: elev,
     }
   },
   (_block) => {
     const col = columnCode()
     const mm = randInt(rng, 80, 350)
+    const ax = axis()
     const elev = pick(rng, LOW_ELEVATIONS)
     return {
-      text: `Cửa cuốn container trục ${axis()} vướng cột thép ${col}, lệch ${mm}mm so với tim thiết kế`,
+      text: {
+        vi: `Cửa cuốn container trục ${ax} vướng cột thép ${col}, lệch ${mm}mm so với tim thiết kế`,
+        en: `Container roller shutter at grid ${ax} fouls steel column ${col}, offset ${mm}mm from the design centerline`,
+      },
       da: 'Kiến trúc', db: 'Kết cấu', elevation: elev,
     }
   },
   (_block) => {
     const tray = pick(rng, CABLE_TRAY_SIZES)
     const size = pick(rng, DUCT_SIZES)
+    const ax = axis()
     const elev = pick(rng, MID_ELEVATIONS)
     return {
-      text: `Thang cáp điện chính ${tray} chồng lên ống gió cấp ${size} tại trục ${axis()}, cao độ ${elev}`,
+      text: {
+        vi: `Thang cáp điện chính ${tray} chồng lên ống gió cấp ${size} tại trục ${ax}, cao độ ${elev}`,
+        en: `Main cable ladder ${tray} overlaps supply duct ${size} at grid ${ax}, elevation ${elev}`,
+      },
       da: 'MEP', db: 'MEP', elevation: elev,
     }
   },
   (_block) => {
+    const ax = axis()
     const elev = pick(rng, ROOF_ELEVATIONS)
     return {
-      text: `Đèn chiếu sáng nhà xưởng (highbay) va chạm giằng mái tại trục ${axis()}, cao độ ${elev}`,
+      text: {
+        vi: `Đèn chiếu sáng nhà xưởng (highbay) va chạm giằng mái tại trục ${ax}, cao độ ${elev}`,
+        en: `Warehouse highbay light clashes with roof bracing at grid ${ax}, elevation ${elev}`,
+      },
       da: 'MEP', db: 'Kết cấu', elevation: elev,
     }
   },
   (_block) => {
     const size = pick(rng, WATER_PIPE_SIZES)
     const beam = beamCode()
+    const ax = axis()
     const elev = pick(rng, ROOF_ELEVATIONS)
     return {
-      text: `Ống thoát nước mái ${size} xuyên qua dầm biên ${beam} tại trục ${axis()}, cao độ ${elev}`,
+      text: {
+        vi: `Ống thoát nước mái ${size} xuyên qua dầm biên ${beam} tại trục ${ax}, cao độ ${elev}`,
+        en: `${size} roof drain pipe penetrates edge beam ${beam} at grid ${ax}, elevation ${elev}`,
+      },
       da: 'MEP', db: 'Kết cấu', elevation: elev,
     }
   },
   (block) => {
     const elev = pick(rng, LOW_ELEVATIONS)
+    const db = dbCode(block)
     return {
-      text: `Vị trí lắp đặt tủ điện phân phối ${dbCode(block)} lấn vào chiều rộng lối thoát hiểm hành lang kỹ thuật Block ${block}`,
+      text: {
+        vi: `Vị trí lắp đặt tủ điện phân phối ${db} lấn vào chiều rộng lối thoát hiểm hành lang kỹ thuật Block ${block}`,
+        en: `Distribution panel ${db} location encroaches on the emergency-exit width of the Block ${block} technical corridor`,
+      },
       da: 'MEP', db: 'Kiến trúc', elevation: elev,
     }
   },
@@ -139,67 +187,103 @@ const TEMPLATES: Template[] = [
     const size = pick(rng, PCCC_PIPE_SIZES)
     const elev = pick(rng, MID_ELEVATIONS)
     return {
-      text: `Đường ống PCCC ${size} trùng tuyến với ống đồng điều hòa tại trần kỹ thuật Block ${block}, cao độ ${elev}`,
+      text: {
+        vi: `Đường ống PCCC ${size} trùng tuyến với ống đồng điều hòa tại trần kỹ thuật Block ${block}, cao độ ${elev}`,
+        en: `${size} fire-protection pipe overlaps the AC copper piping route in the Block ${block} technical ceiling, elevation ${elev}`,
+      },
       da: 'MEP', db: 'MEP', elevation: elev,
     }
   },
   (_block) => {
+    const ax = axis()
     const elev = pick(rng, ROOF_ELEVATIONS)
     return {
-      text: `Xà gồ mái đâm xuyên hộp kỹ thuật MEP (MEP box) tại trục ${axis()}, cao độ ${elev}`,
+      text: {
+        vi: `Xà gồ mái đâm xuyên hộp kỹ thuật MEP (MEP box) tại trục ${ax}, cao độ ${elev}`,
+        en: `Roof purlin pierces the MEP box at grid ${ax}, elevation ${elev}`,
+      },
       da: 'Kết cấu', db: 'MEP', elevation: elev,
     }
   },
   (block) => {
     const size = pick(rng, SITE_PIPE_SIZES)
     return {
-      text: `Tuyến ống cấp nước ngoài nhà ${size} chồng tuyến cáp điện ngầm trung thế tại khu vực giáp ranh Block ${block}`,
+      text: {
+        vi: `Tuyến ống cấp nước ngoài nhà ${size} chồng tuyến cáp điện ngầm trung thế tại khu vực giáp ranh Block ${block}`,
+        en: `${size} outdoor water supply line overlaps the underground medium-voltage cable route at the Block ${block} boundary area`,
+      },
       da: 'Hạ tầng', db: 'Hạ tầng', elevation: '+0.000',
     }
   },
   (block) => {
     const hg = `HG-${randInt(rng, 1, 40)}`
     return {
-      text: `Hố ga thoát nước mưa ${hg} trùng vị trí móng cột đèn chiếu sáng sân bãi khu vực Block ${block}`,
+      text: {
+        vi: `Hố ga thoát nước mưa ${hg} trùng vị trí móng cột đèn chiếu sáng sân bãi khu vực Block ${block}`,
+        en: `Stormwater manhole ${hg} coincides with a yard light-pole footing in the Block ${block} area`,
+      },
       da: 'Hạ tầng', db: 'Hạ tầng', elevation: '+0.000',
     }
   },
   (block) => {
+    const ax = axis()
     return {
-      text: `Trục kỹ thuật đứng (shaft) MEP đụng dầm sàn tầng 2 khu văn phòng Block ${block}, tại trục ${axis()}`,
+      text: {
+        vi: `Trục kỹ thuật đứng (shaft) MEP đụng dầm sàn tầng 2 khu văn phòng Block ${block}, tại trục ${ax}`,
+        en: `MEP vertical shaft clashes with the level-2 floor beam in the Block ${block} office area, at grid ${ax}`,
+      },
       da: 'MEP', db: 'Kết cấu', elevation: '+4.500',
     }
   },
   (block) => {
     const beam = beamCode()
+    const ax = axis()
     return {
-      text: `Dầm phụ ${beam} hạ cao độ đáy dầm vướng trần thạch cao khu văn phòng Block ${block}, tại trục ${axis()}`,
+      text: {
+        vi: `Dầm phụ ${beam} hạ cao độ đáy dầm vướng trần thạch cao khu văn phòng Block ${block}, tại trục ${ax}`,
+        en: `Secondary beam ${beam}, with a lowered soffit level, fouls the gypsum ceiling in the Block ${block} office area, at grid ${ax}`,
+      },
       da: 'Kết cấu', db: 'Kiến trúc', elevation: '+3.300',
     }
   },
   (_block) => {
     const p1 = pick(rng, WATER_PIPE_SIZES)
     const p2 = pick(rng, WATER_PIPE_SIZES)
+    const ax = axis()
     const elev = pick(rng, LOW_ELEVATIONS.concat(MID_ELEVATIONS))
     return {
-      text: `Đường ống thoát nước thải ${p1} chồng tuyến ống cấp nước sạch ${p2} tại trục ${axis()}, cao độ ${elev}`,
+      text: {
+        vi: `Đường ống thoát nước thải ${p1} chồng tuyến ống cấp nước sạch ${p2} tại trục ${ax}, cao độ ${elev}`,
+        en: `${p1} wastewater pipe overlaps ${p2} clean-water supply pipe at grid ${ax}, elevation ${elev}`,
+      },
       da: 'MEP', db: 'MEP', elevation: elev,
     }
   },
   (_block) => {
+    const ax = axis()
     const elev = pick(rng, ROOF_ELEVATIONS)
     return {
-      text: `Quạt hút công nghiệp lắp mái vướng hệ xà gồ mái tại trục ${axis()}, cao độ ${elev}`,
+      text: {
+        vi: `Quạt hút công nghiệp lắp mái vướng hệ xà gồ mái tại trục ${ax}, cao độ ${elev}`,
+        en: `Roof-mounted industrial exhaust fan fouls the roof purlin system at grid ${ax}, elevation ${elev}`,
+      },
       da: 'MEP', db: 'Kết cấu', elevation: elev,
     }
   },
   (block) => {
     return {
-      text: `Rãnh thoát nước sân bãi xung đột với bậc tam cấp lối vào khu văn phòng Block ${block}`,
+      text: {
+        vi: `Rãnh thoát nước sân bãi xung đột với bậc tam cấp lối vào khu văn phòng Block ${block}`,
+        en: `Yard drainage channel clashes with the entrance steps of the Block ${block} office area`,
+      },
       da: 'Hạ tầng', db: 'Kiến trúc', elevation: '+0.000',
     }
   },
 ]
+
+function chance50(): boolean {
+  return rng() < 0.5
+}
 
 const SEVERITY_WEIGHTS: Array<[ClashSeverity, number]> = [
   ['A', 15],
@@ -222,18 +306,45 @@ const ASSIGNEES = namesOf(BIM_TEAM.concat(SITE_TEAM))
 const BIM_NAMES = namesOf(BIM_TEAM)
 const FOLLOWUP_NAMES = namesOf(SITE_TEAM.concat(BIM_TEAM))
 
-const COMMENTS_OPEN = [
-  'Đã ghi nhận xung đột, chuyển bộ môn liên quan kiểm tra.',
-  'Đang chờ phương án điều chỉnh từ tư vấn thiết kế.',
-  'Đã trao đổi với đội thi công, chờ xác nhận phương án xử lý.',
-  'Đã họp phối hợp bộ môn, đang so sánh 2 phương án né tránh.',
+const COMMENTS_OPEN: Array<Record<Lang, string>> = [
+  {
+    vi: 'Đã ghi nhận xung đột, chuyển bộ môn liên quan kiểm tra.',
+    en: 'Clash logged and forwarded to the relevant discipline for review.',
+  },
+  {
+    vi: 'Đang chờ phương án điều chỉnh từ tư vấn thiết kế.',
+    en: 'Awaiting a revised solution from the design consultant.',
+  },
+  {
+    vi: 'Đã trao đổi với đội thi công, chờ xác nhận phương án xử lý.',
+    en: 'Discussed with the site team, awaiting confirmation of the resolution approach.',
+  },
+  {
+    vi: 'Đã họp phối hợp bộ môn, đang so sánh 2 phương án né tránh.',
+    en: 'Held a coordination meeting with the disciplines, comparing two avoidance options.',
+  },
 ]
-const COMMENTS_RESOLVED = [
-  'Đã cập nhật lại mô hình theo phương án điều chỉnh, xung đột được xử lý.',
-  'Điều chỉnh cao độ tuyến ống, đã xác nhận hết xung đột trên mô hình.',
-  'Thống nhất phương án né tránh với các bộ môn liên quan, đã đóng xung đột.',
-  'Đã thi công theo phương án điều chỉnh, kiểm tra thực tế khớp mô hình.',
-  'Dịch chuyển tuyến ống/máng cáp sang vị trí mới, đã nghiệm thu nội bộ.',
+const COMMENTS_RESOLVED: Array<Record<Lang, string>> = [
+  {
+    vi: 'Đã cập nhật lại mô hình theo phương án điều chỉnh, xung đột được xử lý.',
+    en: 'Model updated per the revised solution; the clash is resolved.',
+  },
+  {
+    vi: 'Điều chỉnh cao độ tuyến ống, đã xác nhận hết xung đột trên mô hình.',
+    en: 'Adjusted the pipe route elevation; confirmed clear of clashes on the model.',
+  },
+  {
+    vi: 'Thống nhất phương án né tránh với các bộ môn liên quan, đã đóng xung đột.',
+    en: 'Agreed on an avoidance solution with the relevant disciplines; clash closed.',
+  },
+  {
+    vi: 'Đã thi công theo phương án điều chỉnh, kiểm tra thực tế khớp mô hình.',
+    en: 'Built per the revised solution; on-site check matches the model.',
+  },
+  {
+    vi: 'Dịch chuyển tuyến ống/máng cáp sang vị trí mới, đã nghiệm thu nội bộ.',
+    en: 'Relocated the pipe/cable-tray route; internally accepted.',
+  },
 ]
 
 function generateComments(
@@ -245,7 +356,10 @@ function generateComments(
     {
       author: reporter,
       date: detectedDate,
-      message: 'Phát hiện xung đột qua kiểm tra mô hình tổng hợp (model liên kết 4 bộ môn).',
+      message: {
+        vi: 'Phát hiện xung đột qua kiểm tra mô hình tổng hợp (model liên kết 4 bộ môn).',
+        en: 'Clash detected during federated model review (4-discipline linked model).',
+      },
     },
   ]
   if (status === 'Đang xử lý' || status === 'Đã xử lý') {
@@ -266,7 +380,10 @@ function generateComments(
     comments.push({
       author: pick(rng, BIM_NAMES),
       date: addDays(detectedDate, randInt(rng, 1, 5)),
-      message: 'Đánh giá mức độ ảnh hưởng không đáng kể, thống nhất bỏ qua không xử lý.',
+      message: {
+        vi: 'Đánh giá mức độ ảnh hưởng không đáng kể, thống nhất bỏ qua không xử lý.',
+        en: 'Assessed as low impact; agreed to leave unresolved.',
+      },
     })
   }
   return comments

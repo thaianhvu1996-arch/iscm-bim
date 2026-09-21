@@ -3,6 +3,8 @@ import type { QuantityItem, QuantityStatus } from '../../data/quantities'
 import { Badge } from '../../components/common/Badge'
 import type { BadgeTone } from '../../components/common/Badge'
 import { formatNumber, formatVNDShort } from '../../utils/format'
+import { useLang } from '../../i18n/LanguageContext'
+import { quantityStatusLabel, unitLabel } from '../../i18n/labels'
 
 function statusTone(status: QuantityStatus): BadgeTone {
   if (status === 'Chênh lệch lớn') return 'danger'
@@ -23,21 +25,22 @@ interface QuantityTableProps {
 }
 
 export function QuantityTable({ items, selectedId, onSelect }: QuantityTableProps) {
+  const { lang } = useLang()
   return (
     <div className="glass shrink-0 overflow-hidden rounded-xl">
       <div className="max-h-[560px] overflow-auto">
         <table className="w-full min-w-[1000px] text-left text-xs">
           <thead className="sticky top-0 z-10 bg-navy-850/95 text-white/55 backdrop-blur">
             <tr>
-              <th className="px-3 py-3 font-medium">Mã</th>
-              <th className="px-3 py-3 font-medium">Tên công tác</th>
-              <th className="px-3 py-3 font-medium">ĐVT</th>
-              <th className="px-3 py-3 text-right font-medium">KL hợp đồng</th>
-              <th className="px-3 py-3 text-right font-medium">KL mô hình</th>
-              <th className="px-3 py-3 text-right font-medium">Chênh lệch</th>
-              <th className="px-3 py-3 text-right font-medium">Đơn giá</th>
-              <th className="px-3 py-3 text-right font-medium">Ảnh hưởng chi phí</th>
-              <th className="px-3 py-3 font-medium">Trạng thái</th>
+              <th className="px-3 py-3 font-medium">{lang === 'vi' ? 'Mã' : 'Code'}</th>
+              <th className="px-3 py-3 font-medium">{lang === 'vi' ? 'Tên công tác' : 'Work item'}</th>
+              <th className="px-3 py-3 font-medium">{lang === 'vi' ? 'ĐVT' : 'Unit'}</th>
+              <th className="px-3 py-3 text-right font-medium">{lang === 'vi' ? 'KL hợp đồng' : 'Contract qty'}</th>
+              <th className="px-3 py-3 text-right font-medium">{lang === 'vi' ? 'KL mô hình' : 'Model qty'}</th>
+              <th className="px-3 py-3 text-right font-medium">{lang === 'vi' ? 'Chênh lệch' : 'Variance'}</th>
+              <th className="px-3 py-3 text-right font-medium">{lang === 'vi' ? 'Đơn giá' : 'Unit price'}</th>
+              <th className="px-3 py-3 text-right font-medium">{lang === 'vi' ? 'Ảnh hưởng chi phí' : 'Cost impact'}</th>
+              <th className="px-3 py-3 font-medium">{lang === 'vi' ? 'Trạng thái' : 'Status'}</th>
             </tr>
           </thead>
           <tbody>
@@ -50,10 +53,10 @@ export function QuantityTable({ items, selectedId, onSelect }: QuantityTableProp
                 }`}
               >
                 <td className="px-3 py-3 font-mono text-white/50">{item.id}</td>
-                <td className="max-w-[220px] truncate px-3 py-3 font-medium text-white/90" title={item.name}>
-                  {item.name}
+                <td className="max-w-[220px] truncate px-3 py-3 font-medium text-white/90" title={item.name[lang]}>
+                  {item.name[lang]}
                 </td>
-                <td className="px-3 py-3 text-white/50">{item.unit}</td>
+                <td className="px-3 py-3 text-white/50">{unitLabel(item.unit, lang)}</td>
                 <td className="px-3 py-3 text-right tabular-nums">{formatNumber(item.contractQty)}</td>
                 <td className="px-3 py-3 text-right tabular-nums">{formatNumber(item.modelQty)}</td>
                 <td className="px-3 py-3 text-right tabular-nums">
@@ -77,20 +80,22 @@ export function QuantityTable({ items, selectedId, onSelect }: QuantityTableProp
                     {item.diffPercent}%
                   </span>
                 </td>
-                <td className="px-3 py-3 text-right tabular-nums text-white/60">{formatVNDShort(item.unitPrice)}</td>
+                <td className="px-3 py-3 text-right tabular-nums text-white/60">{formatVNDShort(item.unitPrice, lang)}</td>
                 <td className="px-3 py-3 text-right tabular-nums font-medium text-white/90">
                   {item.costImpact > 0 ? '+' : ''}
-                  {formatVNDShort(item.costImpact)}
+                  {formatVNDShort(item.costImpact, lang)}
                 </td>
                 <td className="px-3 py-3">
-                  <Badge tone={statusTone(item.status)}>{item.status}</Badge>
+                  <Badge tone={statusTone(item.status)}>{quantityStatusLabel(item.status, lang)}</Badge>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
         {items.length === 0 && (
-          <p className="px-4 py-8 text-center text-sm text-white/40">Không có hạng mục phù hợp bộ lọc.</p>
+          <p className="px-4 py-8 text-center text-sm text-white/40">
+            {lang === 'vi' ? 'Không có hạng mục phù hợp bộ lọc.' : 'No items match the current filters.'}
+          </p>
         )}
       </div>
     </div>

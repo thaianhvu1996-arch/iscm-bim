@@ -4,6 +4,7 @@ import { PROJECT_START, ELAPSED_DAYS, TOTAL_PROJECT_DAYS, CURRENT_DATE } from '.
 import { addMonths } from '../../utils/random'
 import { formatMonthShort } from '../../utils/format'
 import { rangePercent, datePercent } from './ganttMath'
+import { useLang } from '../../i18n/LanguageContext'
 
 interface GanttChartProps {
   items: ScheduleItem[]
@@ -18,6 +19,7 @@ function barColor(status: ScheduleItem['status']): string {
 }
 
 export function GanttChart({ items }: GanttChartProps) {
+  const { lang } = useLang()
   const todayPercent = (ELAPSED_DAYS / TOTAL_PROJECT_DAYS) * 100
 
   return (
@@ -28,7 +30,7 @@ export function GanttChart({ items }: GanttChartProps) {
           <div className="flex text-[11px] text-white/45">
             {MONTHS.map((m, i) => (
               <div key={i} className="flex-1 border-l border-navy-700 pl-1.5 first:border-l-0">
-                {formatMonthShort(m)}
+                {formatMonthShort(m, lang)}
               </div>
             ))}
           </div>
@@ -44,10 +46,10 @@ export function GanttChart({ items }: GanttChartProps) {
 
           return (
             <div key={item.id} className="flex items-center border-t border-navy-800 py-1.5 first:border-t-0">
-              <div className="w-56 shrink-0 truncate pr-3 text-xs text-white/75" title={item.name}>
+              <div className="w-56 shrink-0 truncate pr-3 text-xs text-white/75" title={item.name[lang]}>
                 <div className="flex items-center gap-1">
                   {item.isCriticalPath && <Flame size={11} className="shrink-0 text-status-danger" />}
-                  <span className="truncate">{item.name}</span>
+                  <span className="truncate">{item.name[lang]}</span>
                 </div>
               </div>
               <div className="relative h-6 flex-1 rounded bg-navy-850">
@@ -61,7 +63,7 @@ export function GanttChart({ items }: GanttChartProps) {
                 <div
                   className="absolute z-10 h-1.5 rounded-full bg-white/40"
                   style={{ left: `${planned.left}%`, width: `${planned.width}%`, top: '4px' }}
-                  title={`Kế hoạch: ${item.name}`}
+                  title={`${lang === 'vi' ? 'Kế hoạch' : 'Planned'}: ${item.name[lang]}`}
                 />
                 {actual && (
                   <div
@@ -72,7 +74,7 @@ export function GanttChart({ items }: GanttChartProps) {
                       top: '14px',
                       backgroundColor: barColor(item.status),
                     }}
-                    title={`Thực tế: ${item.name}`}
+                    title={`${lang === 'vi' ? 'Thực tế' : 'Actual'}: ${item.name[lang]}`}
                   />
                 )}
                 <div
@@ -87,19 +89,21 @@ export function GanttChart({ items }: GanttChartProps) {
 
       <div className="mt-3 flex items-center gap-5 border-t border-navy-700 pt-3 text-[11px] text-white/45">
         <span className="flex items-center gap-1.5">
-          <span className="h-1.5 w-4 rounded-full bg-white/40" /> Kế hoạch
+          <span className="h-1.5 w-4 rounded-full bg-white/40" /> {lang === 'vi' ? 'Kế hoạch' : 'Planned'}
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="h-1.5 w-4 rounded-full bg-status-success" /> Đúng/hoàn thành
+          <span className="h-1.5 w-4 rounded-full bg-status-success" />{' '}
+          {lang === 'vi' ? 'Đúng/hoàn thành' : 'On track / done'}
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="h-1.5 w-4 rounded-full bg-status-danger" /> Chậm tiến độ
+          <span className="h-1.5 w-4 rounded-full bg-status-danger" /> {lang === 'vi' ? 'Chậm tiến độ' : 'Delayed'}
         </span>
         <span className="flex items-center gap-1.5">
-          <Flame size={11} className="text-status-danger" /> Đường găng
+          <Flame size={11} className="text-status-danger" /> {lang === 'vi' ? 'Đường găng' : 'Critical path'}
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="h-3 w-px bg-status-info" /> Hôm nay ({Math.round(datePercent(CURRENT_DATE))}%)
+          <span className="h-3 w-px bg-status-info" />{' '}
+          {lang === 'vi' ? 'Hôm nay' : 'Today'} ({Math.round(datePercent(CURRENT_DATE))}%)
         </span>
       </div>
     </div>

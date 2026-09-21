@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { AppView, BlockId, Discipline, ScreenId } from './types'
 import { RoleProvider, useRole } from './context/RoleContext'
+import { LanguageProvider } from './i18n/LanguageContext'
 import { AppShell } from './components/layout/AppShell'
 import { Intro } from './screens/Intro/Intro'
 import { Dashboard } from './screens/Dashboard/Dashboard'
@@ -48,9 +49,11 @@ function Shell() {
 
 function App() {
   return (
-    <RoleProvider>
-      <Shell />
-    </RoleProvider>
+    <LanguageProvider>
+      <RoleProvider>
+        <Shell />
+      </RoleProvider>
+    </LanguageProvider>
   )
 }
 

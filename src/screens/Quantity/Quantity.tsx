@@ -16,6 +16,8 @@ import { QuantityCharts } from './QuantityCharts'
 import { QuantityTable } from './QuantityTable'
 import { QuantityDetailPanel } from './QuantityDetailPanel'
 import { ProcurementBatches } from './ProcurementBatches'
+import { useLang } from '../../i18n/LanguageContext'
+import { disciplineLabel, quantityStatusLabel } from '../../i18n/labels'
 
 type BlockFilter = 'all' | BlockId
 type DisciplineFilter = 'all' | Discipline
@@ -29,6 +31,7 @@ interface QuantityProps {
 }
 
 export function Quantity({ onViewOn3D }: QuantityProps) {
+  const { lang } = useLang()
   const [blockFilter, setBlockFilter] = useState<BlockFilter>('all')
   const [disciplineFilter, setDisciplineFilter] = useState<DisciplineFilter>('all')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
@@ -55,16 +58,36 @@ export function Quantity({ onViewOn3D }: QuantityProps) {
     <div className="flex h-full">
       <div className="flex min-w-0 flex-1 flex-col gap-4 overflow-y-auto p-6">
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
-          <KpiCard label="Giá trị hợp đồng" value={formatVNDShort(getContractValue())} icon={<Wallet size={16} />} accent="neutral" />
-          <KpiCard label="Giá trị đã thực hiện" value={formatVNDShort(getExecutedValue())} icon={<TrendingUp size={16} />} accent="info" />
           <KpiCard
-            label="Chênh lệch khối lượng phát hiện"
-            value={formatVNDShort(getTotalQuantityVariance())}
+            label={lang === 'vi' ? 'Giá trị hợp đồng' : 'Contract value'}
+            value={formatVNDShort(getContractValue(), lang)}
+            icon={<Wallet size={16} />}
+            accent="neutral"
+          />
+          <KpiCard
+            label={lang === 'vi' ? 'Giá trị đã thực hiện' : 'Value executed'}
+            value={formatVNDShort(getExecutedValue(), lang)}
+            icon={<TrendingUp size={16} />}
+            accent="info"
+          />
+          <KpiCard
+            label={lang === 'vi' ? 'Chênh lệch khối lượng phát hiện' : 'Quantity variance detected'}
+            value={formatVNDShort(getTotalQuantityVariance(), lang)}
             icon={<FileBarChart size={16} />}
             accent="brand"
           />
-          <KpiCard label="Hạng mục cảnh báo" value={String(getFlaggedQuantityCount())} icon={<AlertTriangle size={16} />} accent="warning" />
-          <KpiCard label="KL bóc tự động từ mô hình" value={`${MODEL_TAKEOFF_COVERAGE}%`} icon={<Gauge size={16} />} accent="success" />
+          <KpiCard
+            label={lang === 'vi' ? 'Hạng mục cảnh báo' : 'Flagged items'}
+            value={String(getFlaggedQuantityCount())}
+            icon={<AlertTriangle size={16} />}
+            accent="warning"
+          />
+          <KpiCard
+            label={lang === 'vi' ? 'KL bóc tự động từ mô hình' : 'Qty auto-derived from model'}
+            value={`${MODEL_TAKEOFF_COVERAGE}%`}
+            icon={<Gauge size={16} />}
+            accent="success"
+          />
         </div>
 
         <QuantityCharts />
@@ -72,7 +95,7 @@ export function Quantity({ onViewOn3D }: QuantityProps) {
         <div className="flex flex-wrap items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-3">
           <FilterGroup label="Block">
             <FilterChip active={blockFilter === 'all'} onClick={() => setBlockFilter('all')}>
-              Tất cả
+              {lang === 'vi' ? 'Tất cả' : 'All'}
             </FilterChip>
             {BLOCKS.map((b) => (
               <FilterChip key={b.id} active={blockFilter === b.id} onClick={() => setBlockFilter(b.id)}>
@@ -80,39 +103,40 @@ export function Quantity({ onViewOn3D }: QuantityProps) {
               </FilterChip>
             ))}
           </FilterGroup>
-          <FilterGroup label="Bộ môn">
+          <FilterGroup label={lang === 'vi' ? 'Bộ môn' : 'Discipline'}>
             <FilterChip active={disciplineFilter === 'all'} onClick={() => setDisciplineFilter('all')}>
-              Tất cả
+              {lang === 'vi' ? 'Tất cả' : 'All'}
             </FilterChip>
             {DISCIPLINES.map((d) => (
               <FilterChip key={d} active={disciplineFilter === d} onClick={() => setDisciplineFilter(d)}>
-                {d}
+                {disciplineLabel(d, lang)}
               </FilterChip>
             ))}
           </FilterGroup>
-          <FilterGroup label="Trạng thái">
+          <FilterGroup label={lang === 'vi' ? 'Trạng thái' : 'Status'}>
             <FilterChip active={statusFilter === 'all'} onClick={() => setStatusFilter('all')}>
-              Tất cả
+              {lang === 'vi' ? 'Tất cả' : 'All'}
             </FilterChip>
             {STATUSES.map((s) => (
               <FilterChip key={s} active={statusFilter === s} onClick={() => setStatusFilter(s)}>
-                {s}
+                {quantityStatusLabel(s, lang)}
               </FilterChip>
             ))}
           </FilterGroup>
-          <FilterGroup label="Sắp xếp">
+          <FilterGroup label={lang === 'vi' ? 'Sắp xếp' : 'Sort'}>
             <FilterChip active={sortKey === 'costImpact'} onClick={() => setSortKey('costImpact')}>
-              Ảnh hưởng chi phí
+              {lang === 'vi' ? 'Ảnh hưởng chi phí' : 'Cost impact'}
             </FilterChip>
             <FilterChip active={sortKey === 'diffPercent'} onClick={() => setSortKey('diffPercent')}>
-              % chênh lệch
+              {lang === 'vi' ? '% chênh lệch' : '% variance'}
             </FilterChip>
             <FilterChip active={sortKey === 'id'} onClick={() => setSortKey('id')}>
-              Mã
+              {lang === 'vi' ? 'Mã' : 'Code'}
             </FilterChip>
           </FilterGroup>
           <span className="ml-auto text-xs text-white/45">
-            {filtered.length} / {quantityItems.length} hạng mục · {QUANTITY_GROUPS.length} nhóm công tác
+            {filtered.length} / {quantityItems.length} {lang === 'vi' ? 'hạng mục' : 'items'} · {QUANTITY_GROUPS.length}{' '}
+            {lang === 'vi' ? 'nhóm công tác' : 'work groups'}
           </span>
         </div>
 

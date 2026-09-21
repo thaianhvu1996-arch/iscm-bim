@@ -3,8 +3,10 @@ import { ChevronLeft, ChevronRight, Wrench } from 'lucide-react'
 import { equipment } from '../../data/equipment'
 import { CURRENT_DATE } from '../../data/constants'
 import { formatMonthLabel } from '../../utils/format'
+import { useLang } from '../../i18n/LanguageContext'
 
-const WEEKDAY_LABELS = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']
+const WEEKDAY_LABELS_VI = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']
+const WEEKDAY_LABELS_EN = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
 
 interface CalendarTask {
   equipmentId: string
@@ -13,6 +15,7 @@ interface CalendarTask {
 }
 
 export function MaintenanceCalendar() {
+  const { lang } = useLang()
   const [cursor, setCursor] = useState(() => new Date(CURRENT_DATE.getFullYear(), CURRENT_DATE.getMonth(), 1))
 
   const tasksByDay = useMemo(() => {
@@ -22,13 +25,13 @@ export function MaintenanceCalendar() {
         if (m.date.getFullYear() === cursor.getFullYear() && m.date.getMonth() === cursor.getMonth()) {
           const key = m.date.getDate()
           const list = map.get(String(key)) ?? []
-          list.push({ equipmentId: eq.id, equipmentName: eq.name, task: m.task })
+          list.push({ equipmentId: eq.id, equipmentName: eq.name[lang], task: m.task[lang] })
           map.set(String(key), list)
         }
       })
     })
     return map
-  }, [cursor])
+  }, [cursor, lang])
 
   const firstWeekday = new Date(cursor.getFullYear(), cursor.getMonth(), 1).getDay()
   const daysInMonth = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0).getDate()
@@ -41,7 +44,7 @@ export function MaintenanceCalendar() {
   return (
     <div className="rounded-xl glass p-4">
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-sm font-semibold text-white/90">Lịch bảo trì</p>
+        <p className="text-sm font-semibold text-white/90">{lang === 'vi' ? 'Lịch bảo trì' : 'Maintenance calendar'}</p>
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -50,7 +53,7 @@ export function MaintenanceCalendar() {
           >
             <ChevronLeft size={15} />
           </button>
-          <span className="w-24 text-center text-xs font-medium text-white/75">{formatMonthLabel(cursor)}</span>
+          <span className="w-24 text-center text-xs font-medium text-white/75">{formatMonthLabel(cursor, lang)}</span>
           <button
             type="button"
             onClick={() => setCursor((c) => new Date(c.getFullYear(), c.getMonth() + 1, 1))}
@@ -62,7 +65,7 @@ export function MaintenanceCalendar() {
       </div>
 
       <div className="grid grid-cols-7 gap-1 text-center text-[10px] text-white/45">
-        {WEEKDAY_LABELS.map((w) => (
+        {(lang === 'vi' ? WEEKDAY_LABELS_VI : WEEKDAY_LABELS_EN).map((w) => (
           <div key={w} className="py-1">
             {w}
           </div>
@@ -97,7 +100,9 @@ export function MaintenanceCalendar() {
           )
         })}
       </div>
-      <p className="mt-3 text-[11px] text-white/45">{totalTasks} mốc bảo trì trong tháng này</p>
+      <p className="mt-3 text-[11px] text-white/45">
+        {totalTasks} {lang === 'vi' ? 'mốc bảo trì trong tháng này' : 'maintenance tasks this month'}
+      </p>
     </div>
   )
 }
