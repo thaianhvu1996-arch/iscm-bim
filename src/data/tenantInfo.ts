@@ -1,0 +1,46 @@
+import type { TenantInfo } from '../types'
+
+export const tenantInfo: TenantInfo[] = [
+  {
+    block: 'A',
+    leasableAreaM2: 9200,
+    floorLoadTonPerM2: 2.0,
+    clearHeightM: 10.5,
+    powerSupplyKVA: 1250,
+    powerUsedKVA: 850,
+    containerDoors: 10,
+    status: 'Đã thuê',
+    tenantName: 'Công ty TNHH Logistics Phương Nam',
+  },
+  {
+    block: 'B',
+    leasableAreaM2: 9200,
+    floorLoadTonPerM2: 2.0,
+    clearHeightM: 10.5,
+    powerSupplyKVA: 1250,
+    powerUsedKVA: 620,
+    containerDoors: 10,
+    status: 'Đã thuê',
+    tenantName: 'Công ty CP Sản xuất Điện tử Việt Thành',
+  },
+  {
+    block: 'C',
+    leasableAreaM2: 9300,
+    floorLoadTonPerM2: 1.5,
+    clearHeightM: 9.0,
+    powerSupplyKVA: 1000,
+    powerUsedKVA: 0,
+    containerDoors: 8,
+    status: 'Còn trống',
+  },
+  {
+    block: 'D',
+    leasableAreaM2: 9300,
+    floorLoadTonPerM2: 1.5,
+    clearHeightM: 9.0,
+    powerSupplyKVA: 1000,
+    powerUsedKVA: 0,
+    containerDoors: 8,
+    status: 'Còn trống',
+  },
+]

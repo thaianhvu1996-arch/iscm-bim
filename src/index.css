@@ -1,0 +1,149 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Barlow:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Barlow", "Montserrat", system-ui, -apple-system, sans-serif;
+  --font-heading: "IBM Plex Sans", "Montserrat", system-ui, -apple-system, sans-serif;
+
+  /* Nền xanh đêm sâu - tông chính của platform ISCM-UEH */
+  --color-navy-950: #0a0e17;
+  --color-navy-900: #0d1220;
+  --color-navy-850: #121826;
+  --color-navy-800: #171f30;
+  --color-navy-700: #232c42;
+  --color-navy-600: #2e3850;
+  --color-navy-500: #3d4860;
+
+  /* Màu thương hiệu ISCM - đỏ #C72127, dùng cho nút chính, active state, tiêu đề nhấn */
+  --color-brand: #c72127;
+  --color-brand-dim: #a11b20;
+  --color-brand-tint-1: #e0656a;
+  --color-brand-tint-2: #efa4a7;
+  --color-brand-tint-3: #fae0e1;
+
+  /* Màu trạng thái dùng xuyên suốt app */
+  --color-status-success: #00e676;
+  --color-status-success-dim: #00b85e;
+  --color-status-warning: #ffab00;
+  --color-status-danger: #ff5252;
+  --color-status-info: #3b82f6;
+  --color-status-neutral: #64748b;
+
+  /* Màu dữ liệu kỹ thuật - dùng tiết chế cho đường biểu đồ phụ và lớp MEP trên mô hình 3D */
+  --color-technical: #00f2fe;
+
+  /* Màu bộ môn - dùng cho mô hình 3D, legend, biểu đồ */
+  --color-discipline-kientruc: #94a3b8;
+  --color-discipline-ketcau: #5b8def;
+  --color-discipline-mep: #00f2fe;
+  --color-discipline-hatang: #14b8a6;
+
+  /* Kính mờ (glassmorphism) */
+  --color-glass-fill: rgba(255, 255, 255, 0.06);
+  --color-glass-fill-strong: rgba(255, 255, 255, 0.1);
+  --color-glass-border: rgba(255, 255, 255, 0.12);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background-color: var(--color-navy-950);
+  color: rgba(255, 255, 255, 0.92);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-navy-600);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-navy-500);
+}
+
+@keyframes fadein {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadein {
+  animation: fadein 0.25s ease-out;
+}
+
+/* Tấm kính mờ dùng cho mọi thẻ, panel, popup, dropdown, modal trên platform */
+.glass {
+  background: var(--color-glass-fill);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--color-glass-border);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.glass-strong {
+  background: var(--color-glass-fill-strong);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--color-glass-border);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.glow-brand {
+  box-shadow: 0 0 12px rgba(199, 33, 39, 0.45);
+}
+
+.glass-hover {
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease,
+    box-shadow 200ms ease,
+    transform 200ms ease;
+}
+.glass-hover:hover {
+  background: var(--color-glass-fill-strong);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+@keyframes lifecycle-flow {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+.lifecycle-line {
+  background-image: linear-gradient(90deg, transparent, rgba(199, 33, 39, 0.75) 45%, rgba(199, 33, 39, 0.75) 55%, transparent);
+  background-size: 220% 100%;
+  animation: lifecycle-flow 5s linear infinite;
+}
+
+@keyframes countup-fade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-countup {
+  animation: countup-fade 0.4s ease-out;
+}
